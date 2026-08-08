@@ -157,6 +157,36 @@ whole time, so nothing waits on it.
 
 ---
 
+## Scroll behaviour
+
+`components/chrome/ScrollManager.tsx` owns this. Two opposite jobs:
+
+- **Forward navigation** pins the document to the very top.
+- **Back / forward** returns the visitor to where they were.
+
+Four things in it are load-bearing:
+
+1. **Never add `scroll-behavior: smooth` to `html`.** It silently breaks the App
+   Router: Next resets scroll with a programmatic scroll, and a global smooth
+   behaviour turns that into an animation the router does not wait for — so every
+   client-side navigation lands on the new page at the *previous* page's scroll
+   position, and back/forward stops restoring. There are only two in-page anchors
+   on this site (the skip link and the order form's error summary) and an instant
+   jump is correct for both, so nothing is lost.
+2. The reset runs inside a **double `requestAnimationFrame`** so it lands after
+   the router's own scroll. A single frame loses the race and you land ~15px short,
+   which clips the top of the rounded hero panel.
+3. Restoration **re-applies until the position holds** for a few frames, and waits
+   for the page to grow tall enough as images arrive. It yields immediately if the
+   visitor touches the scrollbar.
+4. Positions are recorded **on the scroll event and when a link is activated, and
+   nowhere else.** Recording in the effect cleanup looks sensible but is wrong: by
+   then the router has already scrolled the outgoing page, so it stores the
+   router's landing position instead of where the visitor was — which quietly
+   turns restoration into "restore to 15px".
+
+---
+
 ## Accessibility
 
 - FAQ uses native `<details>` — keyboard operable, works with no JS, findable by in-page search

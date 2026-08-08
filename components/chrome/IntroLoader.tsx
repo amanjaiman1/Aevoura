@@ -61,6 +61,11 @@ export function IntroLoader() {
 
     document.documentElement.setAttribute("data-booting", "");
 
+    // A reload or a restored tab can bring back a previous scroll position.
+    // The intro would then hide it and the reveal would drop the visitor into
+    // the middle of the page. If we are showing an intro, start at the top.
+    window.scrollTo(0, 0);
+
     let left = false;
     const leave = () => {
       if (left) return;

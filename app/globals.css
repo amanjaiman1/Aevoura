@@ -120,13 +120,15 @@
 
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-behavior: smooth;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
+    /* DO NOT add `scroll-behavior: smooth` here.
+       It silently breaks the App Router: Next resets scroll on navigation with
+       a programmatic scroll, and a global smooth behaviour turns that into an
+       animation the router does not wait for — so every client-side navigation
+       lands on the new page at the *previous* page's scroll position, and
+       back/forward stops restoring position too.
+       There are only two in-page anchors on this site (the skip link and the
+       order form's error summary) and an instant jump is the correct behaviour
+       for both, so nothing is lost. */
   }
 
   body {

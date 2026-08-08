@@ -277,8 +277,17 @@ export function OrderForm({
             <ul className="mt-2 space-y-1">
               {Object.entries(errors).map(([key, text]) => (
                 <li key={key}>
+                  {/* Anchor for no-JS; the handler additionally focuses the
+                      field, which browsers do not do reliably on their own. */}
                   <a
                     href={`#${field(key)}`}
+                    onClick={(event) => {
+                      const el = document.getElementById(field(key));
+                      if (!el) return;
+                      event.preventDefault();
+                      el.scrollIntoView({ block: "center" });
+                      (el as HTMLElement).focus({ preventScroll: true });
+                    }}
                     className="link-rule text-[0.875rem] text-ink"
                   >
                     {text}

@@ -6,6 +6,7 @@ import { site } from "@/lib/site";
 import { SiteHeader } from "@/components/chrome/SiteHeader";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
 import { IntroLoader } from "@/components/chrome/IntroLoader";
+import { ScrollManager } from "@/components/chrome/ScrollManager";
 import { MotionRuntime } from "@/components/motion/MotionRuntime";
 
 /**
@@ -94,10 +95,13 @@ export default function RootLayout({
       </head>
       <body>
         <IntroLoader />
+        <ScrollManager />
         <MotionRuntime />
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
-          <main id="main" className="flex-1">
+          {/* tabIndex allows the skip link to move focus here, not just
+              scroll. Programmatic focus on a container needs no ring. */}
+          <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
             {children}
           </main>
           <SiteFooter />
