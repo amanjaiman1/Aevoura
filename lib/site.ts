@@ -48,6 +48,19 @@ export const site = {
     "Source price credited if you upgrade to a custom build",
   ],
 
+  /**
+   * The entrance animation. Editable because a loader is a real trade-off:
+   * it buys atmosphere and costs time-to-content. Keep it short.
+   *   enabled          master switch
+   *   oncePerSession   returning visitors skip it entirely
+   *   holdMs           how long the mark holds before the panels lift
+   */
+  intro: {
+    enabled: true,
+    oncePerSession: true,
+    holdMs: 1120,
+  },
+
   /** Configurable placeholders. Empty `href` renders as inactive text. */
   social: [
     { label: "Instagram", href: "" },

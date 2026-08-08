@@ -420,3 +420,357 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+
+/* ============================================================
+   THE ENTRANCE
+
+   A dark stage, then five panels lift away with a crimson leading
+   edge. Five panels, five templates.
+
+   Entirely CSS: the overlay is server-rendered, so if the exit
+   depended on JavaScript a visitor with JS disabled would be stuck
+   behind it forever. Transforms and opacity only — no layout is
+   animated, so this stays on the compositor.
+
+   Timeline (ms)
+     100  mark disc scales in
+     260  mark stroke draws itself
+     300  wordmark letters rise, 42ms apart
+     240  rail fills and the counter steps 01 -> 05
+     640  tagline fades up
+    1120  stage fades, panels begin lifting 60ms apart
+    2060  last panel clears
+   ============================================================ */
+
+#aevoura-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  overflow: hidden;
+  /* Deliberately transparent: the five panels are the cover. If the container
+     carried the dark colour too, lifting the panels would reveal *it* rather
+     than the page, and the reveal would look like nothing happened. */
+  /* Never intercepts a click, even mid-animation. */
+  pointer-events: none;
+  /* Belt and braces for the no-JavaScript path: once the sequence has run the
+     container moves itself off-screen entirely. With JS the node is unmounted
+     before this matters. */
+  animation: boot-retire 1ms linear forwards;
+  animation-delay: calc(var(--boot-hold, 1400ms) + 1100ms);
+}
+
+/* Translated off-screen rather than `visibility: hidden`: visibility is a
+   discrete property and does not reliably hold under animation-fill-mode,
+   whereas a transform always does. */
+@keyframes boot-retire {
+  to {
+    transform: translate3d(0, -100%, 0);
+  }
+}
+
+/* ---- the shutters ---- */
+
+.boot-panels {
+  position: absolute;
+  inset: 0;
+}
+
+.boot-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* 1px overlap: no sub-pixel seams as the panels travel. */
+  width: calc(20% + 1px);
+  background-color: var(--color-dark);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* The lit edge that sweeps up with each panel. */
+.boot-panel::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  background-color: var(--color-accent);
+  opacity: 0;
+}
+
+/* The lift runs on a CSS delay by default, so a visitor with JavaScript
+   disabled is never left behind a permanent dark screen. `--boot-hold` is set
+   slightly later than the JS timer, so with JS present the attribute below
+   fires first and this is only ever a fallback. */
+.boot-panel {
+  animation: boot-lift 700ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  animation-delay: calc(var(--boot-hold, 1400ms) + var(--i) * 60ms);
+}
+.boot-panel::after {
+  animation: boot-edge 700ms linear forwards;
+  animation-delay: calc(var(--boot-hold, 1400ms) + var(--i) * 60ms);
+}
+
+/* JavaScript path: start now instead of waiting out the fallback delay. */
+#aevoura-boot[data-leaving="true"] .boot-panel,
+#aevoura-boot[data-leaving="true"] .boot-panel::after {
+  animation-delay: calc(var(--i) * 60ms);
+}
+
+@keyframes boot-lift {
+  to {
+    transform: translate3d(0, -101%, 0);
+  }
+}
+@keyframes boot-edge {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---- the seams ---- */
+
+.boot-seams {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.boot-seams > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: rgb(255 255 255 / 0.07);
+  transform: scaleY(0);
+  transform-origin: top center;
+  animation: boot-seam 720ms var(--ease-reveal) forwards;
+}
+@keyframes boot-seam {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* The seams leave with the stage. */
+.boot-seams {
+  animation: boot-stage-out 260ms var(--ease-action) forwards;
+  animation-delay: var(--boot-hold, 1400ms);
+}
+#aevoura-boot[data-leaving="true"] .boot-seams {
+  animation-delay: 0ms;
+}
+
+/* ---- the stage ---- */
+
+.boot-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.boot-stage {
+  animation: boot-stage-out 260ms var(--ease-action) forwards;
+  animation-delay: var(--boot-hold, 1400ms);
+}
+#aevoura-boot[data-leaving="true"] .boot-stage {
+  animation-delay: 0ms;
+}
+@keyframes boot-stage-out {
+  to {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+.boot-center {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+/* ---- the mark ---- */
+
+.boot-mark {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  opacity: 0;
+  transform: scale(0.55);
+  animation: boot-mark-in 620ms var(--ease-reveal) 100ms forwards;
+}
+.boot-mark svg {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+@keyframes boot-mark-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.boot-mark-a,
+.boot-mark-bar {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: boot-draw 640ms var(--ease-reveal) 260ms forwards;
+}
+.boot-mark-bar {
+  stroke-dasharray: 10;
+  stroke-dashoffset: 10;
+  animation-delay: 460ms;
+  animation-duration: 420ms;
+}
+@keyframes boot-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---- the wordmark ---- */
+
+.boot-word {
+  display: flex;
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 7vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: #fff;
+}
+.boot-word > span {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 0.5em, 0);
+  animation: boot-letter 620ms var(--ease-reveal) forwards;
+}
+@keyframes boot-letter {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.boot-tagline {
+  margin-top: 1rem;
+  max-width: 24ch;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-chalk-muted);
+  opacity: 0;
+  animation: boot-fade-up 620ms var(--ease-reveal) 640ms forwards;
+}
+@keyframes boot-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.5rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ---- the status band ---- */
+
+.boot-band {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 3vw, 1.5rem);
+  opacity: 0;
+  animation: boot-fade-up 520ms var(--ease-reveal) 200ms forwards;
+}
+
+.boot-count,
+.boot-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+.boot-label {
+  color: var(--color-chalk-muted);
+  white-space: nowrap;
+}
+
+/* A window one row tall over a column of five numbers. Stepping the strip
+   counts 01 -> 05 with no JavaScript. Four steps between five rows. */
+.boot-count {
+  display: block;
+  height: 1.2em;
+  overflow: hidden;
+}
+.boot-count-strip {
+  display: block;
+  animation: boot-count 800ms steps(4, jump-end) 240ms forwards;
+}
+.boot-count-strip > span {
+  display: block;
+  height: 1.2em;
+  line-height: 1.2em;
+}
+@keyframes boot-count {
+  to {
+    transform: translate3d(0, -80%, 0);
+  }
+}
+
+.boot-rail {
+  position: relative;
+  display: block;
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-dark-rule);
+}
+.boot-rail-fill {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-color: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: boot-rail 860ms var(--ease-archive) 240ms forwards;
+}
+@keyframes boot-rail {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Nothing scrolls behind the overlay while it is up. */
+html[data-booting] body {
+  overflow: hidden;
+}
+
+/* Motion is unwelcome: skip the whole thing. */
+@media (prefers-reduced-motion: reduce) {
+  #aevoura-boot {
+    display: none !important;
+  }
+}
