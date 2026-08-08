@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Work } from "@/lib/works";
+import type { Template } from "@/lib/templates";
 import { hasFinePointer, isLowPowerDevice } from "@/lib/motion";
 import { PlayMark } from "@/components/primitives/Marks";
 
 type PreviewMediaProps = {
-  work: Work;
+  template: Template;
   /**
    * `visible` — video starts when the surface is properly on screen (desktop).
    * `intent`  — video starts only on deliberate hover or an explicit tap.
@@ -15,42 +15,39 @@ type PreviewMediaProps = {
   /** The first poster on a page should not be lazy. */
   priority?: boolean;
   className?: string;
-  /** Rendered above the media, inside the frame. */
   children?: React.ReactNode;
   sizes?: string;
 };
 
 /**
- * Poster first. Always.
+ * Poster first, always.
  *
- * The poster is a real, sized image so the box never shifts. The preview
- * video is a progressive enhancement: the <video> element is not even
- * created until it is wanted, it never downloads on a low-power device or a
- * metered connection until asked, and it is paused the moment it leaves the
- * viewport or the tab is hidden.
+ * The poster is a real, sized image so the box never shifts. Preview video is
+ * a progressive enhancement: the <video> element is not created until it is
+ * wanted, never downloads on a low-power or metered connection until asked,
+ * and pauses the moment it leaves the viewport or the tab is hidden.
  *
  * Works with `previewVideo: null` — the poster simply stands alone, which is
  * the current state of the collection.
  */
 export function PreviewMedia({
-  work,
+  template,
   trigger = "visible",
   priority = false,
   className = "",
   children,
   sizes,
 }: PreviewMediaProps) {
-  const [ratioW, ratioH] = work.posterAspect;
-  const hasVideo = Boolean(work.previewVideo);
+  const [ratioW, ratioH] = template.posterAspect;
+  const hasVideo = Boolean(template.previewVideo);
 
   const frame = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
-  const [mounted, setMounted] = useState(false); // has the <video> been created
+  const [mounted, setMounted] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [wantsManual, setWantsManual] = useState(false);
   const inView = useRef(false);
 
-  /* Decide whether this device should ever autostart a preview. */
   const autoAllowed = useCallback(() => {
     if (!hasVideo) return false;
     if (isLowPowerDevice()) return false;
@@ -58,7 +55,6 @@ export function PreviewMedia({
     return hasFinePointer();
   }, [hasVideo, trigger]);
 
-  /* Visibility drives both creation and pausing. */
   useEffect(() => {
     if (!hasVideo) return;
     const el = frame.current;
@@ -80,7 +76,6 @@ export function PreviewMedia({
     return () => observer.disconnect();
   }, [hasVideo, autoAllowed]);
 
-  /* Never render video work for a hidden tab. */
   useEffect(() => {
     const onVisibility = () => {
       if (document.hidden) {
@@ -98,7 +93,6 @@ export function PreviewMedia({
     if (!hasVideo) return;
     setMounted(true);
     setWantsManual(true);
-    // The element may have only just been created; play on the next tick.
     window.setTimeout(() => {
       void video.current?.play().catch(() => {});
     }, 0);
@@ -115,33 +109,33 @@ export function PreviewMedia({
   return (
     <div
       ref={frame}
-      className={`relative isolate overflow-hidden bg-paper-sunk ${className}`}
+      className={`zoom-frame relative isolate bg-sunk ${className}`}
       style={{ aspectRatio: `${ratioW} / ${ratioH}` }}
       onPointerEnter={hasVideo && hasFinePointer() ? start : undefined}
       onPointerLeave={hasVideo && hasFinePointer() ? stop : undefined}
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- posters ship as
           pre-optimised SVG; the image optimiser cannot improve on them and
-          would only add a request. Swap to next/image with real raster art. */}
+          would only add a request. Swap to next/image with raster art. */}
       <img
-        src={work.poster}
-        alt={work.posterAlt}
+        src={template.poster}
+        alt={template.posterAlt}
         width={ratioW}
         height={ratioH}
         sizes={sizes}
         loading={priority ? "eager" : "lazy"}
         decoding={priority ? "sync" : "async"}
         fetchPriority={priority ? "high" : "auto"}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="zoom-media absolute inset-0 h-full w-full object-cover"
       />
 
-      {mounted && work.previewVideo && (
+      {mounted && template.previewVideo && (
         <video
           ref={video}
           className="preview-video absolute inset-0 h-full w-full object-cover"
           data-playing={playing ? "true" : "false"}
-          src={work.previewVideo}
-          poster={work.poster}
+          src={template.previewVideo}
+          poster={template.poster}
           muted
           loop
           playsInline
@@ -158,10 +152,10 @@ export function PreviewMedia({
         <button
           type="button"
           onClick={start}
-          className="absolute bottom-4 left-4 z-10 inline-flex min-h-11 items-center gap-2 border border-paper/40 bg-void/55 px-3 py-2 meta text-chalk backdrop-blur-sm transition-colors duration-200 hover:bg-void/80"
+          className="absolute bottom-3 left-3 z-10 inline-flex min-h-11 items-center gap-2 rounded-full bg-black/55 px-4 text-[0.8125rem] font-bold text-white backdrop-blur-sm transition-colors duration-200 hover:bg-black/75"
         >
           <PlayMark />
-          Play preview
+          Preview
         </button>
       )}
 

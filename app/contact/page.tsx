@@ -1,172 +1,222 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
-import { getWork } from "@/lib/works";
-import { engagements, carePlan, formatFrom, formatPrice } from "@/lib/pricing";
-import { EnquiryForm } from "@/components/forms/EnquiryForm";
-import { LineMask } from "@/components/primitives/LineMask";
-import { Reveal } from "@/components/primitives/Reveal";
-import { RegistrationMark, SectionLabel, Arrow } from "@/components/primitives/Marks";
+import { getTemplate, templates } from "@/lib/templates";
+import { plans, formatPlanPrice, carePlan, formatPrice } from "@/lib/pricing";
+import { quickMailto } from "@/lib/order";
+import { ActionLink } from "@/components/primitives/ActionLink";
+import { Eyebrow, MailIcon, CheckMark } from "@/components/primitives/Marks";
 
 export const metadata: Metadata = {
-  title: "Enquire — talk to the people who build it",
-  description: `Buy a source licence, get a work deployed, commission a custom build, or ask about exclusivity. Written replies within one working day from ${site.contact.email}.`,
+  title: "Contact",
+  description: `Questions about a template, a custom build, or an invoice — email ${site.contact.email} and get a reply from the person who does the work.`,
   alternates: { canonical: "/contact" },
 };
 
-/** Intent arrives from CTAs across the site and shapes this page's framing. */
-const intents: Record<
-  string,
-  { label: string; heading: [string, string?]; lead: string; services: string[] }
-> = {
-  source: {
-    label: "SOURCE LICENCE",
-    heading: ["Buy the", "source code."],
-    lead: "Tell us which work and we will send the invoice and repository access. Installation support is included for 14 days, and the price is credited if you upgrade to a custom build within 30 days.",
-    services: ["Source code only"],
-  },
-  launch: {
-    label: "SETUP & DEPLOYMENT",
-    heading: ["Get it live,", "properly."],
-    lead: "We put your content into the work, swap it to your brand, configure hosting, analytics and metadata, and hand you a finished site. Usually five to eight working days.",
-    services: ["Setup & deployment"],
+/** Intent arrives from CTAs across the site and shapes the framing. */
+const intents: Record<string, { label: string; heading: string; lead: string; subject: string }> = {
+  demo: {
+    label: "Private demo",
+    heading: "See it running.",
+    lead: "Not every template has a public demo yet. Ask and we will send a private link, or walk you through it on a call — including the parts that are hard to appreciate in a screenshot.",
+    subject: "Private demo request",
   },
   exclusive: {
-    label: "EXCLUSIVE LICENCE",
-    heading: ["Take it off", "the market."],
-    lead: "Tell us which work you want exclusively. We will quote it, and if you proceed the design is withdrawn from the collection permanently and transferred to you in writing.",
-    services: ["Exclusive licence"],
+    label: "Exclusive licence",
+    heading: "Take it off the market.",
+    lead: "Tell us which template you want exclusively. We will quote it, and if you proceed the design is withdrawn from the collection permanently and transferred to you in writing.",
+    subject: "Exclusive licence enquiry",
   },
   care: {
-    label: "CARE PLAN",
-    heading: ["Keep it", "improving."],
+    label: "Care plan",
+    heading: "Keep it improving.",
     lead: "Monthly upkeep, updates, performance monitoring and small additions. Works on sites we built and, after a review, on sites we did not.",
-    services: ["Ongoing care plan"],
+    subject: "Care plan enquiry",
   },
-  demo: {
-    label: "PRIVATE DEMO",
-    heading: ["See it", "running."],
-    lead: "Not every work has a public demo yet. Ask and we will send a private link or walk you through it on a call — including the parts that are hard to appreciate in a screenshot.",
-    services: [],
+  invoice: {
+    label: "Invoice",
+    heading: "Billing and invoices.",
+    lead: "Questions about an invoice, a payment method or a GST detail — send the reference number from your order email and we will sort it out.",
+    subject: "Invoice question",
   },
 };
 
 const defaultIntent = {
-  label: "ENQUIRE",
-  heading: ["Talk to the people", "who build it."] as [string, string?],
-  lead: "There is no sales team, no chatbot and no drip sequence. Your enquiry reaches the person who would do the work, and you get a written reply within one working day.",
-  services: [] as string[],
+  label: "Contact",
+  heading: "Talk to the person who builds it.",
+  lead: "No sales team, no chatbot, no drip sequence. Your email reaches the person who would do the work, and you get a written reply within one working day.",
+  subject: "Question",
 };
 
 export default async function ContactPage({
   searchParams,
 }: {
-  searchParams: Promise<{ intent?: string; work?: string }>;
+  searchParams: Promise<{ intent?: string; template?: string }>;
 }) {
   const params = await searchParams;
   const intent = (params.intent && intents[params.intent]) || defaultIntent;
-  const selected = params.work ? getWork(params.work) : undefined;
+  const selected = params.template ? getTemplate(params.template) : undefined;
+
+  const subject = selected ? `${intent.subject} — ${selected.name}` : intent.subject;
 
   return (
     <>
-      <section className="shell" aria-labelledby="contact-title">
-        <div className="flex items-center justify-between gap-4 border-b border-rule py-4">
-          <span className="meta text-ink">{intent.label}</span>
-          <div className="flex items-center gap-4 sm:gap-8">
-            <RegistrationMark className="hidden sm:block" />
-            <span className="meta text-ink-muted">{site.contact.timezone}</span>
-          </div>
-        </div>
-
-        <div className="grid gap-y-10 pt-12 pb-14 lg:grid-cols-12 lg:gap-x-8 lg:pt-16">
+      <section className="shell pt-10 pb-8 sm:pt-14">
+        <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-7">
-            <h1 id="contact-title">
-              <LineMask
-                as="span"
-                mode="exhibition"
-                className="block font-display text-statement tracking-[-0.02em] text-ink"
-                lines={intent.heading.filter(Boolean) as string[]}
-              />
+            <Eyebrow>{intent.label}</Eyebrow>
+            <h1 className="mt-4 font-display text-[clamp(2.25rem,4.4vw,3.5rem)] leading-[1.04] font-bold tracking-[-0.03em] text-ink">
+              {intent.heading}
             </h1>
-          </div>
-          <div className="lg:col-span-4 lg:col-start-9 lg:pt-3">
-            <Reveal as="p" variant="up" mode="archive" className="text-lede text-ink-soft">
+            <p className="mt-5 max-w-xl text-[1.0625rem] leading-relaxed text-ink-soft">
               {intent.lead}
-            </Reveal>
+            </p>
           </div>
         </div>
       </section>
 
-      <section className="shell border-t border-rule section-y" aria-labelledby="form-title">
-        <div className="grid gap-y-12 lg:grid-cols-12 lg:gap-x-8">
-          {/* ── side: routes and prices ── */}
-          <div className="lg:col-span-4">
-            <SectionLabel index="—">DIRECT</SectionLabel>
-            <h2 id="form-title" className="mt-6 font-display text-title text-ink">
-              Email, if you prefer
+      <section className="shell pb-16" aria-label="Contact details">
+        <div className="grid gap-5 lg:grid-cols-12">
+          {/* email card */}
+          <div className="card p-7 sm:p-10 lg:col-span-7">
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent-tint text-accent">
+              <MailIcon className="h-6 w-6" />
+            </span>
+            <h2 className="mt-6 font-display text-[clamp(1.5rem,2.4vw,2rem)] font-bold text-ink">
+              Email is the fastest route.
             </h2>
-            <a
-              href={`mailto:${site.contact.email}`}
-              className="link-rule mt-3 inline-block text-[1.0625rem] break-all text-ink"
-            >
-              {site.contact.email}
-            </a>
-            <p className="mt-4 meta text-ink-muted">
-              Replies within one working day · {site.contact.location}
+            <p className="mt-4 measure text-[1rem] leading-relaxed text-ink-soft">
+              Everything runs through one inbox — orders, questions, invoices.
+              You will get a reply {site.contact.responseTime} from{" "}
+              {site.contact.location}, working {site.contact.timezone}.
             </p>
 
-            <div className="mt-10 border-t border-rule pt-6">
-              <p className="meta text-ink-muted">WHAT THINGS COST</p>
-              <dl className="mt-4">
-                {engagements.map((model) => (
-                  <div
-                    key={model.id}
-                    className="flex items-baseline justify-between gap-4 border-b border-rule py-3"
-                  >
-                    <dt className="text-[0.9375rem] text-ink-soft">{model.name}</dt>
-                    <dd className="meta text-ink">{formatFrom(model.priceFrom)}</dd>
-                  </div>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <ActionLink
+                href={quickMailto(subject)}
+                variant="primary"
+                size="lg"
+                icon={<MailIcon />}
+                arrow={false}
+              >
+                {site.contact.email}
+              </ActionLink>
+              <ActionLink href="/buy" variant="outline" size="lg">
+                Place an order instead
+              </ActionLink>
+            </div>
+
+            <div className="mt-8 border-t border-rule pt-6">
+              <p className="eyebrow text-ink-muted">Include this and we can answer properly</p>
+              <ul className="mt-4 grid gap-x-8 gap-y-2.5 sm:grid-cols-2">
+                {[
+                  "Which template you are looking at",
+                  "What your business sells",
+                  "Whether you have content ready",
+                  "Your rough budget and deadline",
+                ].map((item) => (
+                  <li key={item} className="flex gap-2.5">
+                    <CheckMark className="mt-0.5 shrink-0 text-endorse" />
+                    <span className="text-[0.875rem] leading-snug text-ink-soft">
+                      {item}
+                    </span>
+                  </li>
                 ))}
-                <div className="flex items-baseline justify-between gap-4 border-b border-rule py-3">
-                  <dt className="text-[0.9375rem] text-ink-soft">{carePlan.name}</dt>
-                  <dd className="meta text-ink">
-                    {formatPrice(carePlan.priceFrom)}
-                    <span className="text-ink-muted"> /mo</span>
-                  </dd>
-                </div>
-              </dl>
-              <Link href="/license" className="link-rule mt-5 inline-block meta text-ink-muted">
-                Licence terms <Arrow />
-              </Link>
+              </ul>
             </div>
 
             {selected && (
-              <Reveal
-                variant="rise"
-                mode="archive"
-                className="mt-10 border-l-2 border-accent bg-paper-raised px-5 py-4"
-              >
-                <p className="meta text-accent">WORK {selected.number}</p>
-                <p className="mt-2 text-[0.9375rem] text-ink">{selected.name}</p>
-                <p className="mt-1 meta text-ink-muted">
-                  {selected.classification.toUpperCase()}
-                </p>
-                <Link
-                  href={`/collection/${selected.slug}`}
-                  className="link-rule mt-3 inline-block meta text-ink"
-                >
-                  Review the work <Arrow />
-                </Link>
-              </Reveal>
+              <div className="mt-8 flex items-center gap-4 rounded-lg bg-sunk p-4">
+                {/* eslint-disable-next-line @next/next/no-img-element -- pre-optimised SVG poster */}
+                <img
+                  src={selected.poster}
+                  alt=""
+                  width={selected.posterAspect[0]}
+                  height={selected.posterAspect[1]}
+                  loading="lazy"
+                  sizes="112px"
+                  className="h-16 w-28 shrink-0 rounded-md object-cover"
+                />
+                <div className="min-w-0">
+                  <p className="text-[0.75rem] font-bold text-ink-muted uppercase">
+                    About
+                  </p>
+                  <p className="font-display text-[1.0625rem] font-bold text-ink">
+                    {selected.name}
+                  </p>
+                  <Link
+                    href={`/templates/${selected.slug}`}
+                    className="link-rule text-[0.8125rem] font-bold text-accent"
+                  >
+                    Back to the template
+                  </Link>
+                </div>
+              </div>
             )}
           </div>
 
-          {/* ── the form ── */}
-          <div className="lg:col-span-7 lg:col-start-6">
-            <EnquiryForm
-              defaultWork={selected?.slug ?? ""}
-              defaultServices={intent.services}
-            />
+          {/* price reference */}
+          <div className="lg:col-span-5">
+            <div className="card p-6 sm:p-7">
+              <p className="eyebrow text-ink-muted">What things cost</p>
+              <dl className="mt-4 divide-y divide-rule-soft">
+                {plans
+                  .filter((p) => p.id !== "care")
+                  .map((plan) => (
+                    <div
+                      key={plan.id}
+                      className="flex items-baseline justify-between gap-4 py-3"
+                    >
+                      <dt className="text-[0.9375rem] text-ink-soft">{plan.name}</dt>
+                      <dd className="num text-[0.9375rem] font-bold whitespace-nowrap text-ink">
+                        {formatPlanPrice(plan)}
+                      </dd>
+                    </div>
+                  ))}
+                <div className="flex items-baseline justify-between gap-4 py-3">
+                  <dt className="text-[0.9375rem] text-ink-soft">{carePlan.name}</dt>
+                  <dd className="num text-[0.9375rem] font-bold whitespace-nowrap text-ink">
+                    {formatPrice(carePlan.price)}
+                    <span className="font-normal text-ink-muted"> /mo</span>
+                  </dd>
+                </div>
+              </dl>
+              <div className="mt-5 flex flex-col gap-2.5 border-t border-rule-soft pt-5">
+                <Link href="/pricing" className="link-rule text-[0.875rem] font-bold text-ink">
+                  Full pricing details
+                </Link>
+                <Link href="/license" className="link-rule text-[0.875rem] font-bold text-ink">
+                  Licence terms
+                </Link>
+              </div>
+            </div>
+
+            <div className="card mt-5 p-6 sm:p-7">
+              <p className="eyebrow text-ink-muted">Jump straight in</p>
+              <ul className="mt-4 space-y-2">
+                {templates.slice(0, 3).map((t) => (
+                  <li key={t.slug}>
+                    <Link
+                      href={`/buy?template=${t.slug}`}
+                      className="flex items-center justify-between gap-3 rounded-md px-3 py-2.5 transition-colors hover:bg-sunk"
+                    >
+                      <span className="text-[0.9375rem] font-medium text-ink">
+                        Buy {t.name}
+                      </span>
+                      <span className="num text-[0.8125rem] font-bold text-ink-muted">
+                        {formatPrice(t.sourcePrice)}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/templates"
+                className="link-rule mt-4 inline-block text-[0.875rem] font-bold text-ink"
+              >
+                See all {site.templateCount} templates
+              </Link>
+            </div>
           </div>
         </div>
       </section>

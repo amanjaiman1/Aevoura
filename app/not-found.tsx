@@ -1,72 +1,59 @@
 import Link from "next/link";
 import { site } from "@/lib/site";
-import { works } from "@/lib/works";
-import { LineMask } from "@/components/primitives/LineMask";
+import { templates } from "@/lib/templates";
+import { formatPrice } from "@/lib/pricing";
 import { ActionLink } from "@/components/primitives/ActionLink";
-import { RegistrationMark } from "@/components/primitives/Marks";
+import { Eyebrow } from "@/components/primitives/Marks";
 
-export const metadata = {
-  title: "Not in the archive",
-};
+export const metadata = { title: "Page not found" };
 
 export default function NotFound() {
   return (
-    <section className="shell" aria-labelledby="nf-title">
-      <div className="flex items-center justify-between gap-4 border-b border-rule py-4">
-        <span className="meta text-ink">404</span>
-        <div className="flex items-center gap-4">
-          <RegistrationMark className="hidden sm:block" />
-          <span className="meta text-ink-muted">EDITION {site.edition}</span>
-        </div>
-      </div>
-
-      <div className="grid gap-y-12 pt-14 pb-20 lg:grid-cols-12 lg:gap-x-8 lg:pt-20">
-        <div className="lg:col-span-7">
-          <h1 id="nf-title">
-            <LineMask
-              as="span"
-              mode="exhibition"
-              className="block font-display text-statement tracking-[-0.02em] text-ink"
-              lines={[
-                "Not in",
-                <>
-                  the{" "}
-                  <span className="italic text-accent">archive.</span>
-                </>,
-              ]}
-            />
+    <section className="shell py-16 sm:py-24">
+      <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+        <div className="lg:col-span-6">
+          <Eyebrow tone="accent">404</Eyebrow>
+          <h1 className="mt-4 font-display text-[clamp(2.25rem,4.4vw,3.5rem)] leading-[1.04] font-bold tracking-[-0.03em] text-ink">
+            That page does not exist.
           </h1>
-          <p className="mt-8 max-w-md text-lede text-ink-soft">
-            The edition holds {works.length} works. Whatever you were looking
-            for is not one of them — it may have been withdrawn after an
-            exclusive sale, or the address may simply be wrong.
+          <p className="mt-5 max-w-md text-[1.0625rem] leading-relaxed text-ink-soft">
+            There are {site.templateCount} templates and whatever you were
+            looking for is not one of them. It may have been sold exclusively and
+            withdrawn, or the address may simply be wrong.
           </p>
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <ActionLink href="/collection" variant="accent">
-              See the collection
+          <div className="mt-8 flex flex-wrap gap-3">
+            <ActionLink href="/templates" variant="primary" size="lg">
+              See the templates
             </ActionLink>
-            <ActionLink href="/" variant="outline">
-              Back to the entrance
+            <ActionLink href="/" variant="outline" size="lg">
+              Back to home
             </ActionLink>
           </div>
         </div>
 
-        <nav aria-label="The collection" className="lg:col-span-4 lg:col-start-9">
-          <p className="meta border-b border-rule pb-4 text-ink-muted">
-            THE FIVE WORKS
-          </p>
-          <ul>
-            {works.map((work) => (
-              <li key={work.slug} className="border-b border-rule">
+        <nav aria-label="Templates" className="lg:col-span-5 lg:col-start-8">
+          <p className="eyebrow text-ink-muted">All templates</p>
+          <ul className="card mt-4 divide-y divide-rule-soft overflow-hidden">
+            {templates.map((template) => (
+              <li key={template.slug}>
                 <Link
-                  href={`/collection/${work.slug}`}
-                  className="flex min-h-14 items-center gap-4 py-3"
+                  href={`/templates/${template.slug}`}
+                  className="flex min-h-16 items-center gap-3 px-4 py-3 transition-colors hover:bg-hover"
                 >
-                  <span className="meta shrink-0 text-ink-muted tabular-nums">
-                    {work.number}
+                  <span className="num w-6 shrink-0 text-[0.75rem] text-ink-faint">
+                    {template.number}
                   </span>
-                  <span className="flex-1 text-[1rem] text-ink">{work.name}</span>
-                  <span className="meta text-ink-muted">{work.industry}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-display text-[1rem] font-bold text-ink">
+                      {template.name}
+                    </span>
+                    <span className="block truncate text-[0.8125rem] text-ink-muted">
+                      {template.industry}
+                    </span>
+                  </span>
+                  <span className="num shrink-0 text-[0.8125rem] font-bold text-ink">
+                    {formatPrice(template.sourcePrice)}
+                  </span>
                 </Link>
               </li>
             ))}

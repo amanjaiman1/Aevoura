@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import { site } from "@/lib/site";
-import { works } from "@/lib/works";
-import { engagements } from "@/lib/pricing";
+import { templates } from "@/lib/templates";
+import { plans } from "@/lib/pricing";
+import { templateFaq } from "@/lib/faq";
 
-import { EnterSequence } from "@/components/chrome/EnterSequence";
 import { Hero } from "@/components/home/Hero";
-import { CollectionSequence } from "@/components/home/CollectionSequence";
-import { FeaturedWork } from "@/components/home/FeaturedWork";
-import { CustomBuildSection } from "@/components/home/CustomBuildSection";
-import { HowItWorks } from "@/components/home/HowItWorks";
-import { EngagementModels } from "@/components/commerce/EngagementModels";
-import { QualitySection } from "@/components/home/QualitySection";
-import { FinalCta } from "@/components/home/FinalCta";
+import { TemplateShowcase } from "@/components/home/TemplateShowcase";
+import { Included } from "@/components/home/Included";
+import { WhyUs } from "@/components/home/WhyUs";
+import { Steps } from "@/components/home/Steps";
+import { PricingRows } from "@/components/commerce/Pricing";
+import { CustomBand } from "@/components/home/CustomBand";
+import { Faq } from "@/components/templates/Faq";
 
 export const metadata: Metadata = {
   title: `${site.name} — ${site.tagline}`,
@@ -20,12 +20,11 @@ export const metadata: Metadata = {
 };
 
 /**
- * Structured data. Honest by construction: it describes a small collection
- * of five products with real starting prices, and claims nothing about
- * ratings or review counts we do not have.
+ * Structured data. Honest by construction: it describes five real products
+ * with real starting prices and claims nothing about ratings or review
+ * counts we do not have.
  */
 function StructuredData() {
-  const lowest = Math.min(...works.map((w) => w.sourcePrice));
   const data = {
     "@context": "https://schema.org",
     "@graph": [
@@ -48,51 +47,44 @@ function StructuredData() {
         inLanguage: "en",
       },
       {
-        "@type": "CollectionPage",
-        "@id": `${site.url}#collection`,
-        name: `Edition ${site.edition}`,
-        description: `${site.workCount} premium website experiences.`,
-        isPartOf: { "@id": `${site.url}#website` },
-        mainEntity: {
-          "@type": "ItemList",
-          numberOfItems: works.length,
-          itemListElement: works.map((work, i) => ({
-            "@type": "ListItem",
-            position: i + 1,
-            item: {
-              "@type": "Product",
-              name: work.name,
-              description: work.positioning,
-              category: work.industry,
-              url: `${site.url}/collection/${work.slug}`,
-              image: `${site.url}${work.poster}`,
-              offers: {
-                "@type": "Offer",
-                priceCurrency: site.market.currency,
-                price: work.sourcePrice,
-                availability:
-                  work.availability === "available"
-                    ? "https://schema.org/InStock"
-                    : "https://schema.org/SoldOut",
-                url: `${site.url}/collection/${work.slug}`,
-              },
+        "@type": "ItemList",
+        name: "Website templates",
+        numberOfItems: templates.length,
+        itemListElement: templates.map((template, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          item: {
+            "@type": "Product",
+            name: `${template.name} — ${template.industry} website template`,
+            description: template.tagline,
+            category: template.category,
+            url: `${site.url}/templates/${template.slug}`,
+            image: `${site.url}${template.poster}`,
+            brand: { "@type": "Brand", name: site.name },
+            offers: {
+              "@type": "Offer",
+              priceCurrency: site.market.currency,
+              price: template.sourcePrice,
+              availability:
+                template.availability === "available"
+                  ? "https://schema.org/InStock"
+                  : "https://schema.org/SoldOut",
+              url: `${site.url}/buy?template=${template.slug}`,
             },
-          })),
-        },
+          },
+        })),
       },
       {
         "@type": "Service",
         "@id": `${site.url}#custom-build`,
-        name: "Custom website build",
+        name: "Custom website design and development",
         provider: { "@id": `${site.url}#organization` },
-        description:
-          engagements.find((e) => e.id === "custom")?.who ??
-          "Custom website design and development.",
+        description: plans.find((p) => p.id === "custom")?.who ?? "",
         areaServed: "Worldwide",
         offers: {
           "@type": "Offer",
           priceCurrency: site.market.currency,
-          price: engagements.find((e) => e.id === "custom")?.priceFrom ?? lowest,
+          price: plans.find((p) => p.id === "custom")?.price ?? 75000,
           url: `${site.url}/custom-build`,
         },
       },
@@ -110,16 +102,20 @@ function StructuredData() {
 export default function HomePage() {
   return (
     <>
-      <EnterSequence />
       <StructuredData />
       <Hero />
-      <CollectionSequence />
-      <FeaturedWork />
-      <CustomBuildSection />
-      <HowItWorks />
-      <EngagementModels />
-      <QualitySection />
-      <FinalCta />
+      <TemplateShowcase />
+      <Included />
+      <WhyUs />
+      <Steps />
+      <PricingRows />
+      <CustomBand />
+      <Faq
+        items={templateFaq}
+        eyebrow="Questions"
+        title="What buyers ask before paying."
+        lead={`Anything else, email ${site.contact.email} — you will get an answer from the person who built it.`}
+      />
     </>
   );
 }

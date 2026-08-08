@@ -1,130 +1,91 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Arrow } from "@/components/primitives/Marks";
+import { ArrowRight, ArrowUpRight } from "./Marks";
 
-type Tone = "paper" | "void";
-type Variant = "solid" | "accent" | "outline" | "quiet";
+type Variant = "primary" | "dark" | "light" | "outline" | "outlineLight" | "quiet";
+type Size = "sm" | "md" | "lg";
 
 type ActionLinkProps = {
   href: string;
   children: ReactNode;
   variant?: Variant;
-  tone?: Tone;
+  size?: Size;
   /** Opens in a new tab with the correct security attributes. */
   external?: boolean;
+  /** Show a trailing arrow. On by default for everything but `quiet`. */
+  arrow?: boolean;
   className?: string;
-  /** Small mono index shown before the label, e.g. "01". */
-  index?: string;
-  /** Announced label when the visible text is not descriptive enough. */
   ariaLabel?: string;
   full?: boolean;
-};
-
-const base =
-  "group/action relative inline-flex items-center justify-between gap-6 overflow-hidden meta transition-colors duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] min-h-11";
-
-const shapes: Record<Variant, string> = {
-  solid: "px-6 py-4 border",
-  accent: "px-6 py-4 border",
-  outline: "px-6 py-4 border",
-  quiet: "py-2",
+  /** Optional leading icon element. */
+  icon?: ReactNode;
 };
 
 /**
- * Commerce motion: fast, responsive, reassuring. Nothing bounces.
+ * The button. Fully rounded pill, bold label, trailing arrow that slides.
  *
- * `accent` is reserved for the primary commercial route — commissioning a
- * build. It is the only vermilion-filled control on the platform, which is
- * what makes it read as the most important thing on the screen.
+ * `primary` is crimson and reserved for the single most important action on
+ * a screen — buying, or starting a project. Everything else is dark, light
+ * or outlined so the crimson never has to compete with itself.
  */
-const skins: Record<Tone, Record<Variant, string>> = {
-  paper: {
-    solid: "border-ink bg-ink text-paper hover:text-paper",
-    accent: "border-accent bg-accent text-paper hover:text-paper",
-    outline: "border-rule text-ink hover:text-paper hover:border-ink",
-    quiet: "text-ink-muted hover:text-accent",
-  },
-  void: {
-    solid: "border-chalk bg-chalk text-void hover:text-void",
-    accent: "border-accent bg-accent text-paper hover:text-void",
-    outline: "border-void-rule text-chalk hover:text-void hover:border-chalk",
-    quiet: "text-chalk-muted hover:text-chalk",
-  },
+
+const sizes: Record<Size, string> = {
+  sm: "px-4 py-2 text-[0.8125rem] gap-2",
+  md: "px-6 py-3.5 text-[0.875rem] gap-2.5",
+  lg: "px-7 py-4 text-[0.9375rem] gap-3",
 };
 
-/** The fill that slides up on hover. Only the bordered variants have one. */
-const fills: Record<Tone, Record<Variant, string>> = {
-  paper: {
-    solid: "bg-accent",
-    accent: "bg-ink",
-    outline: "bg-ink",
-    quiet: "",
-  },
-  void: {
-    solid: "bg-accent",
-    accent: "bg-chalk",
-    outline: "bg-chalk",
-    quiet: "",
-  },
+const skins: Record<Variant, string> = {
+  primary:
+    "bg-accent text-white border border-accent hover:bg-accent-deep hover:border-accent-deep",
+  dark: "bg-ink text-white border border-ink hover:bg-dark hover:border-dark",
+  light: "bg-white text-ink border border-white hover:bg-white/90",
+  outline:
+    "bg-transparent text-ink border border-rule hover:border-ink hover:bg-surface",
+  outlineLight:
+    "bg-transparent text-white border border-white/35 hover:border-white hover:bg-white/10",
+  quiet: "bg-transparent text-ink-muted hover:text-accent border border-transparent px-0",
 };
 
 export function ActionLink({
   href,
   children,
   variant = "outline",
-  tone = "paper",
+  size = "md",
   external = false,
+  arrow,
   className = "",
-  index,
   ariaLabel,
   full = false,
+  icon,
 }: ActionLinkProps) {
-  const hasFill = variant !== "quiet";
-
-  const content = (
-    <>
-      {hasFill && (
-        <span
-          aria-hidden="true"
-          className={`pointer-events-none absolute inset-0 translate-y-full transition-transform duration-[280ms] ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/action:translate-y-0 group-focus-visible/action:translate-y-0 ${fills[tone][variant]}`}
-        />
-      )}
-      <span className="relative flex items-center gap-3">
-        {index && (
-          <span aria-hidden="true" className="opacity-45">
-            {index}
-          </span>
-        )}
-        <span>{children}</span>
-      </span>
-      <span
-        aria-hidden="true"
-        className="relative block w-4 shrink-0 overflow-hidden"
-      >
-        <span className="block transition-transform duration-[280ms] ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/action:translate-x-[130%] group-focus-visible/action:translate-x-[130%]">
-          <Arrow dir={external ? "ne" : "right"} />
-        </span>
-        <span className="absolute inset-0 block -translate-x-[130%] transition-transform duration-[280ms] ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/action:translate-x-0 group-focus-visible/action:translate-x-0">
-          <Arrow dir={external ? "ne" : "right"} />
-        </span>
-      </span>
-    </>
-  );
+  const showArrow = arrow ?? variant !== "quiet";
+  const Arrow = external ? ArrowUpRight : ArrowRight;
 
   const classes = [
-    base,
-    shapes[variant],
-    skins[tone][variant],
+    "group/action inline-flex min-h-11 items-center justify-center rounded-full font-bold leading-none transition-colors duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]",
+    sizes[size],
+    skins[variant],
     full ? "w-full" : "",
     className,
   ]
     .filter(Boolean)
     .join(" ");
 
+  const content = (
+    <>
+      {icon && <span className="shrink-0">{icon}</span>}
+      <span>{children}</span>
+      {showArrow && (
+        <Arrow className="transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/action:translate-x-0.5 motion-reduce:transition-none" />
+      )}
+    </>
+  );
+
   // mailto: and tel: are plain anchors — no router, no new tab.
   if (href.startsWith("mailto:") || href.startsWith("tel:")) {
     return (
-      <a href={href} className={classes} aria-label={ariaLabel} data-cursor="link">
+      <a href={href} className={classes} aria-label={ariaLabel}>
         {content}
       </a>
     );
@@ -138,7 +99,6 @@ export function ActionLink({
         rel="noopener noreferrer"
         className={classes}
         aria-label={ariaLabel}
-        data-cursor="external"
       >
         {content}
       </a>
@@ -146,8 +106,60 @@ export function ActionLink({
   }
 
   return (
-    <Link href={href} className={classes} aria-label={ariaLabel} data-cursor="link">
+    <Link href={href} className={classes} aria-label={ariaLabel}>
       {content}
+    </Link>
+  );
+}
+
+/** Circular icon button, as used in the header. */
+export function IconButton({
+  href,
+  label,
+  children,
+  external = false,
+  variant = "dark",
+  className = "",
+}: {
+  href: string;
+  label: string;
+  children: ReactNode;
+  external?: boolean;
+  variant?: "dark" | "light" | "accent";
+  className?: string;
+}) {
+  const skin = {
+    dark: "bg-ink text-white hover:bg-accent",
+    light: "bg-white text-ink hover:bg-white/90",
+    accent: "bg-accent text-white hover:bg-accent-deep",
+  }[variant];
+
+  const classes = `inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-200 ${skin} ${className}`;
+
+  if (href.startsWith("mailto:") || href.startsWith("tel:")) {
+    return (
+      <a href={href} aria-label={label} title={label} className={classes}>
+        {children}
+      </a>
+    );
+  }
+  if (external) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={label}
+        title={label}
+        className={classes}
+      >
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} aria-label={label} title={label} className={classes}>
+      {children}
     </Link>
   );
 }

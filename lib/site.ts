@@ -1,45 +1,52 @@
 /**
  * AEVOURA — platform configuration.
  *
- * Everything brand-, contact- and edition-related lives here.
- * Rename the platform, change the email, or ship Edition 002
- * without touching a single component.
+ * Brand, contact and commercial promises live here. Rename the business or
+ * change the email once and it updates everywhere.
  */
 
 export const site = {
   name: "Aevoura",
-  /** Used in the wordmark, where letter-spacing is applied per character. */
-  wordmark: "AEVOURA",
   domain: "aevoura.com",
   url: "https://aevoura.com",
 
-  /** The collection is deliberately finite. These two numbers are the motif. */
-  edition: "001",
-  workCount: 5,
-  /** Spelled out, for use in prose where a numeral reads badly. */
-  workCountWord: "five",
-
-  tagline: "A finite collection of website experiences.",
+  tagline: "Premium website templates, built to launch",
   description:
-    "Five website experiences, built to be owned or rebuilt around your brand. Buy the source, or commission the custom build.",
+    "Five premium website templates, engineered end to end. Buy the source, have us launch it, or commission a custom build around your brand. Delivered from India, working worldwide.",
+
+  /** The collection is finite on purpose. Used as a curation signal. */
+  templateCount: 5,
+  templateCountWord: "five",
 
   contact: {
+    /** Every order and enquiry lands here. */
     email: "editionaman089@gmail.com",
     /** Optional. Leave empty to hide from the interface. */
     phone: "",
+    whatsapp: "",
     location: "India",
-    /** Working timezone, shown in the footer as a small honesty signal. */
     timezone: "IST (UTC+5:30)",
+    responseTime: "within 1 working day",
   },
 
-  /** Primary market first. Currency is used for all price formatting. */
   market: {
     primary: "India",
     currency: "INR",
     locale: "en-IN",
     internationalNote:
-      "Based in India. Working with brands internationally — invoicing in INR or USD.",
+      "Based in India, working with brands worldwide. Invoiced in INR, or USD for international clients.",
   },
+
+  /**
+   * Commercial promises. These are the trust signals — all of them are
+   * things we control and can honour, rather than invented statistics.
+   */
+  promises: [
+    "Full source code, yours to keep",
+    "One-time price, no subscription",
+    "Free installation support for 14 days",
+    "Source price credited if you upgrade to a custom build",
+  ],
 
   /** Configurable placeholders. Empty `href` renders as inactive text. */
   social: [
@@ -53,46 +60,43 @@ export const site = {
 export type NavItem = {
   label: string;
   href: string;
-  /** Marks the primary commercial route for emphasis in the header. */
-  emphasis?: boolean;
 };
 
 export const primaryNav: NavItem[] = [
-  { label: "Collection", href: "/collection" },
-  { label: "Custom Build", href: "/custom-build", emphasis: true },
+  { label: "Templates", href: "/templates" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Custom Build", href: "/custom-build" },
   { label: "Process", href: "/process" },
   { label: "About", href: "/about" },
 ];
 
 export const footerNav: { title: string; items: NavItem[] }[] = [
   {
-    title: "Collection",
+    title: "Templates",
     items: [
-      { label: "All five works", href: "/collection" },
-      { label: "Aurvi — Fine jewellery", href: "/collection/aurvi" },
-      { label: "Kinetic — Mobility", href: "/collection/kinetic" },
-      { label: "Monolith — Architecture", href: "/collection/monolith" },
-      { label: "Velora — Skincare", href: "/collection/velora" },
-      { label: "Orbital — Technology", href: "/collection/orbital" },
+      { label: "All five templates", href: "/templates" },
+      { label: "Aurvi — Fine jewellery", href: "/templates/aurvi" },
+      { label: "Kinetic — Automotive", href: "/templates/kinetic" },
+      { label: "Monolith — Architecture", href: "/templates/monolith" },
+      { label: "Velora — Skincare", href: "/templates/velora" },
+      { label: "Orbital — Technology", href: "/templates/orbital" },
     ],
   },
   {
-    title: "Studio",
+    title: "Buy",
     items: [
+      { label: "Pricing", href: "/pricing" },
+      { label: "Place an order", href: "/buy" },
       { label: "Custom build", href: "/custom-build" },
-      { label: "Process", href: "/process" },
-      { label: "About", href: "/about" },
-      { label: "Enquire", href: "/contact" },
+      { label: "Licence terms", href: "/license" },
     ],
   },
   {
-    title: "Terms",
+    title: "Company",
     items: [
-      { label: "Licensing", href: "/license" },
-      { label: "Exclusive licence", href: "/license#exclusive" },
-      { label: "What we hand over", href: "/license#handover" },
+      { label: "How it works", href: "/process" },
+      { label: "About", href: "/about" },
+      { label: "Contact", href: "/contact" },
     ],
   },
 ];
-
-export const legalName = `${site.name} — Edition ${site.edition}`;

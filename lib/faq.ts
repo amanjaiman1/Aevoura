@@ -2,23 +2,51 @@
 
 export type FaqItem = { q: string; a: string };
 
-/** Shown on every work detail page. */
-export const workFaq: FaqItem[] = [
+/** Shown on the order page — all about the mechanics of paying and receiving. */
+export const buyFaq: FaqItem[] = [
+  {
+    q: "Why is there no card checkout?",
+    a: "We have not set up a payment gateway yet, and we would rather say that than fake one. Every one of these engagements needs a short conversation first anyway — which template, what content you have, what the deadline is — so the email is the first step rather than an extra one.",
+  },
+  {
+    q: "How do I actually pay?",
+    a: "We reply to your order with an invoice and payment details — UPI or bank transfer for India, and bank transfer or Wise for international clients. Nothing is due until you have the invoice and have agreed the scope in writing.",
+  },
+  {
+    q: "What happens after I pay?",
+    a: "For source code, you get repository access within 24 hours. For Setup & Launch we start immediately and you are usually live in 5 to 8 working days. For custom builds we book a kickoff call and write the scope before any design work begins.",
+  },
+  {
+    q: "The email app did not open. What now?",
+    a: "That happens on machines with no desktop mail client configured. The confirmation screen gives you a one-click Gmail compose link and a button that copies the whole order to your clipboard, so you can paste it into any email client or send it over WhatsApp.",
+  },
+  {
+    q: "Can I change my order after sending it?",
+    a: "Yes. Nothing is locked until you have paid. Reply to your own email or send a new order — quote the reference number and we will use the latest one.",
+  },
+  {
+    q: "Do you take on projects outside India?",
+    a: "Regularly. Prices are listed in rupees; international clients can be invoiced in USD at the prevailing rate. Time zones have not been a problem so far — most communication is written.",
+  },
+  {
+    q: "Is the price per site or per company?",
+    a: "Per production site. One licence runs one live website. If you need it on a second domain, that is a second licence, and an exclusive licence removes the template from sale entirely.",
+  },
+];
+
+/** Shown on every template page. */
+export const templateFaq: FaqItem[] = [
   {
     q: "What exactly do I receive when I buy the source code?",
     a: "The complete repository: every page, component, animation and style file, the design tokens, the placeholder assets, and a setup document that gets it running locally in a few minutes. No obfuscation, no removed sections, no licence key phoning home.",
   },
   {
+    q: "Do I need a developer?",
+    a: "For source code, yes — or someone on your team who is comfortable with Next.js. If you would rather not touch it, Setup & Launch puts it live with your content, and a Custom Build rebuilds it around your brand.",
+  },
+  {
     q: "Can I change the design myself afterwards?",
     a: "Yes. Colour, type and spacing are centralised as design tokens, so a full rebrand is a handful of values rather than a search across files. Larger structural changes are ordinary React work.",
-  },
-  {
-    q: "Do I need to know how to code?",
-    a: "For the source-code option, yes — or someone on your team does. If you would rather not touch it, Launch puts it live with your content, and Custom rebuilds it around your brand.",
-  },
-  {
-    q: "How many sites can I run on one licence?",
-    a: "One production site per standard licence. A second project needs a second licence. Exclusive licences transfer the design to you entirely and remove it from sale here.",
   },
   {
     q: "What if I buy the source and then want the custom build?",
@@ -30,7 +58,7 @@ export const workFaq: FaqItem[] = [
   },
   {
     q: "Do you provide the images and copy?",
-    a: "The build ships with art-directed placeholders so nothing looks broken. Your real photography and copy go in during Launch or Custom. We can write the copy if you want it handled.",
+    a: "The template ships with art-directed placeholders so nothing looks broken. Your real photography and copy go in during Setup & Launch or a Custom Build. We can write the copy if you want it handled.",
   },
   {
     q: "What happens after launch?",
@@ -42,15 +70,15 @@ export const workFaq: FaqItem[] = [
 export const customBuildFaq: FaqItem[] = [
   {
     q: "How is this different from hiring an agency from scratch?",
-    a: "You are not paying for the first three weeks of exploration. The structure, motion language and engineering already exist and are already working, so the budget goes into what makes the site yours rather than into discovering a direction.",
+    a: "You are not paying for the first three weeks of exploration. The structure, motion language and engineering already exist and already work, so the budget goes into what makes the site yours rather than into discovering a direction.",
   },
   {
-    q: "How different can the final site be from the original work?",
+    q: "How different can the final site be from the template?",
     a: "As different as you need. Some projects keep the structure and change the identity. Others keep only the engineering standard and rebuild the rest. The starting point is a floor, not a ceiling.",
   },
   {
     q: "What do you need from me to begin?",
-    a: "A sense of the brand, whatever assets exist, and clarity on what the site has to achieve commercially. If any of that is missing we work through it in the first call rather than sending a form back.",
+    a: "A sense of the brand, whatever assets exist, and clarity on what the site has to achieve commercially. If any of that is missing we work through it on the first call rather than sending a form back.",
   },
   {
     q: "How long does a custom build take?",
@@ -58,7 +86,7 @@ export const customBuildFaq: FaqItem[] = [
   },
   {
     q: "How does payment work?",
-    a: "Typically 40% to begin, 40% at design approval, 20% at launch. Invoiced in INR, or USD for international clients. Nothing is paid before scope is written down.",
+    a: "Typically 40% to begin, 40% at design approval, 20% at launch. Invoiced in INR, or USD for international clients. Nothing is paid before the scope is written down.",
   },
   {
     q: "Who owns the final work?",
@@ -82,10 +110,14 @@ export const licenceFaq: FaqItem[] = [
   },
   {
     q: "What does an exclusive licence actually guarantee?",
-    a: "That the design is withdrawn from this collection permanently, removed from the site, and never sold to anyone else. It is recorded in writing, and the work is marked as withdrawn here rather than quietly deleted.",
+    a: "That the design is withdrawn from this collection permanently, removed from the site, and never sold to anyone else. It is recorded in writing, and the template is marked as sold here rather than quietly deleted.",
   },
   {
     q: "Are the fonts and assets included?",
     a: "Open-source fonts are included and named. Commercially licensed fonts are listed with a link so you can buy the licence in your own name — we cannot legally transfer those. Placeholder assets are ours and are cleared for your use.",
+  },
+  {
+    q: "Can I get a refund?",
+    a: "Source-code purchases are not refundable once repository access has been granted, because they cannot be returned — which is why we publish live demos and answer every question first. Service work that has not started yet is refundable in full.",
   },
 ];

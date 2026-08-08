@@ -1,39 +1,37 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, Inter_Tight, Geist_Mono } from "next/font/google";
+import { Comfortaa, DM_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { site } from "@/lib/site";
 import { SiteHeader } from "@/components/chrome/SiteHeader";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
-import { ArchiveRail } from "@/components/chrome/ArchiveRail";
-import { Cursor } from "@/components/chrome/Cursor";
 import { MotionRuntime } from "@/components/motion/MotionRuntime";
 
 /**
- * Three families, each with a job:
- *   display  the manifesto voice
- *   sans     everything you actually read and click
- *   mono     archive metadata — the platform's typographic signature
+ * Two families with a clear division of labour, plus mono for figures.
+ *   display  Comfortaa — rounded geometric, warm and confident. Headlines.
+ *   sans     DM Sans — everything you actually read and click.
+ *   mono     tabular figures in prices and counts.
  *
- * `display: swap` throughout: text is readable immediately and never
- * blocked on a font download.
+ * `display: swap` throughout: text is readable immediately.
  */
-const display = Instrument_Serif({
+const display = Comfortaa({
   subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
+  weight: ["400", "500", "700"],
   display: "swap",
-  variable: "--font-instrument-serif",
+  variable: "--font-comfortaa",
 });
 
-const sans = Inter_Tight({
+const sans = DM_Sans({
   subsets: ["latin"],
+  weight: ["400", "500", "700"],
   display: "swap",
-  variable: "--font-inter-tight",
+  variable: "--font-dm-sans",
 });
 
 const mono = Geist_Mono({
   subsets: ["latin"],
+  weight: ["400", "500"],
   display: "swap",
   variable: "--font-geist-mono",
 });
@@ -48,11 +46,12 @@ export const metadata: Metadata = {
   applicationName: site.name,
   keywords: [
     "premium website templates",
-    "custom website development",
-    "Next.js website design",
-    "GSAP website",
-    "Three.js product experience",
-    "website design India",
+    "buy website template",
+    "Next.js website template",
+    "custom website development India",
+    "GSAP website template",
+    "3D product website",
+    "website design for brands",
   ],
   authors: [{ name: site.name, url: site.url }],
   openGraph: {
@@ -73,16 +72,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#efebe3",
+  themeColor: "#f7f7f8",
   colorScheme: "light",
 };
 
 /**
- * Sets `js-motion` before first paint, and only when motion is welcome.
- * Elements marked for reveal are hidden by CSS behind this class, so:
- *   no JS      → content visible
- *   reduced    → content visible
- *   otherwise  → MotionRuntime animates it in
+ * Adds `js-motion` before first paint, and only when motion is welcome.
+ * Elements marked for reveal are hidden by CSS behind this class, so no-JS
+ * and reduced-motion visitors always see complete content.
  */
 const MOTION_BOOTSTRAP = `(function(){try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('js-motion')}}catch(e){}})();`;
 
@@ -95,16 +92,9 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: MOTION_BOOTSTRAP }} />
       </head>
       <body>
-        <Cursor />
         <MotionRuntime />
-
-        {/* The rail is a physical margin: content begins after it. */}
-        <div className="relative flex min-h-screen flex-col lg:pl-rail">
+        <div className="flex min-h-screen flex-col">
           <SiteHeader />
-          {/* Fixed-position, so DOM order is purely about the tab sequence:
-              skip link and primary navigation first, then the collection
-              index, then the page itself. */}
-          <ArchiveRail />
           <main id="main" className="flex-1">
             {children}
           </main>
