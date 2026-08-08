@@ -116,6 +116,47 @@ There is no state in which content stays invisible. Hero media is deliberately *
 
 ---
 
+## The entrance
+
+A dark stage holds the mark while a counter steps 01 → 05, then the screen
+splits into five panels that lift away with a crimson leading edge to reveal
+the site. Five panels, five templates.
+
+Tuned in `site.intro`:
+
+```ts
+intro: { enabled: true, oncePerSession: true, holdMs: 1120 }
+```
+
+- **`enabled`** turn it off entirely
+- **`oncePerSession`** returning visitors skip it
+- **`holdMs`** how long the mark holds before the panels part
+
+### Why the exit runs on CSS, not JavaScript
+
+The overlay is server-rendered. If its removal depended on a React effect,
+a visitor with JavaScript disabled would sit behind a permanent dark screen
+with the whole site behind it — which is exactly the bug an earlier version of
+this had. So the panels lift on a CSS delay by default, and JavaScript only
+ever makes it leave *sooner* (on any key, click or scroll) before dropping the
+node from the tree.
+
+Three further details worth keeping if you edit it:
+
+- `#aevoura-boot` is **transparent**. The five panels are the cover. If the
+  container carried the dark colour too, lifting the panels would reveal *it*
+  rather than the page and the reveal would look like nothing happened.
+- The container retires with a **transform**, not `visibility: hidden` —
+  visibility is a discrete property and does not reliably hold under
+  `animation-fill-mode: forwards`.
+- The counter shows 01–05, the real template count. It is not a fake progress
+  percentage, because there is nothing genuine to measure.
+
+Skipped entirely under `prefers-reduced-motion`. Content renders underneath the
+whole time, so nothing waits on it.
+
+---
+
 ## Accessibility
 
 - FAQ uses native `<details>` — keyboard operable, works with no JS, findable by in-page search

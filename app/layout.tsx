@@ -5,6 +5,7 @@ import "./globals.css";
 import { site } from "@/lib/site";
 import { SiteHeader } from "@/components/chrome/SiteHeader";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
+import { IntroLoader } from "@/components/chrome/IntroLoader";
 import { MotionRuntime } from "@/components/motion/MotionRuntime";
 
 /**
@@ -92,6 +93,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: MOTION_BOOTSTRAP }} />
       </head>
       <body>
+        <IntroLoader />
         <MotionRuntime />
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
