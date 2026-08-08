@@ -1,143 +1,152 @@
 /**
  * Commercial structure.
  *
- * Prices are plain numbers in INR so they can be reformatted or
- * converted centrally. Change a number here and it updates everywhere:
- * homepage, work detail pages, engagement models, and the enquiry form.
+ * Prices are plain numbers in INR so they can be reformatted or converted
+ * centrally. Change a number here and it updates on the homepage, the
+ * pricing page, every template page, and the order form.
  */
 
 import { site } from "./site";
+import type { IconName } from "@/components/primitives/Marks";
 
-export type EngagementId = "source" | "launch" | "custom" | "exclusive" | "care";
+export type PlanId = "source" | "launch" | "custom" | "exclusive" | "care";
 
-export type Engagement = {
-  id: EngagementId;
-  index: string;
+export type Plan = {
+  id: PlanId;
+  /** Shown in lists and on the order form. */
   name: string;
-  /** Short label used in compact contexts. */
-  short: string;
-  /** null = quotation rather than a starting price. */
-  priceFrom: number | null;
-  priceNote: string;
-  /** Who this is genuinely for. Written plainly. */
+  /** One line, for the order summary. */
+  summary: string;
+  icon: IconName;
+  /** null = quoted rather than fixed. */
+  price: number | null;
+  /** true when `price` is a starting point rather than the final figure. */
+  from: boolean;
+  /** e.g. "one-time", "per month" */
+  unit: string;
   who: string;
   includes: string[];
   delivery: string;
-  cta: { label: string; href: string };
-  /** The custom path carries the most commercial weight. */
+  /** Highlighted as the most common choice. */
+  popular?: boolean;
+  /** Given the most visual weight — the primary commercial route. */
   emphasis?: boolean;
 };
 
-export const engagements: Engagement[] = [
+export const plans: Plan[] = [
   {
     id: "source",
-    index: "01",
-    name: "Source",
-    short: "Source code",
-    priceFrom: 9999,
-    priceNote: "one-time, per work",
-    who: "Developers and in-house teams who want the build and will take it from there themselves.",
+    name: "Source Code",
+    summary: "The full build, yours to install and run",
+    icon: "cart",
+    price: 9999,
+    from: false,
+    unit: "one-time",
+    who: "Developers and in-house teams who want the build and will take it from there.",
     includes: [
-      "Full source repository",
-      "Component and animation code, commented",
-      "Design tokens and asset files",
+      "Complete source repository",
+      "Every page, component and animation, commented",
+      "Design tokens and placeholder assets",
       "Setup documentation",
-      "Standard licence — one production site",
-      "14 days of installation support over email",
+      "Licence for one production site",
+      "14 days of installation support by email",
     ],
     delivery: "Repository access within 24 hours of payment.",
-    cta: { label: "Buy the source", href: "/contact?intent=source" },
   },
   {
     id: "launch",
-    index: "02",
-    name: "Launch",
-    short: "Setup & deployment",
-    priceFrom: 25000,
-    priceNote: "one-time, per work",
-    who: "Brands who like a work as it stands and want it live, correctly, without hiring a developer.",
+    name: "Setup & Launch",
+    summary: "We put your content in and take it live",
+    icon: "rocket",
+    price: 25000,
+    from: true,
+    unit: "one-time",
+    who: "Brands who like a template as it is and want it live, correctly, without hiring a developer.",
     includes: [
-      "Everything in Source",
-      "Your content, copy and images placed",
-      "Logo, typography and colour swapped to your brand",
+      "Everything in Source Code",
+      "Your copy, images and products placed",
+      "Logo, colour and typography set to your brand",
       "Domain, hosting and deployment configured",
-      "Analytics, forms and metadata connected",
+      "Analytics, forms and search metadata connected",
       "Performance and cross-browser pass before handover",
     ],
-    delivery: "Typically live in 5 to 8 working days.",
-    cta: { label: "Get it launched", href: "/contact?intent=launch" },
+    delivery: "Live in 5 to 8 working days.",
+    popular: true,
   },
   {
     id: "custom",
-    index: "03",
-    name: "Custom",
-    short: "Custom build",
-    priceFrom: 75000,
-    priceNote: "starting, scoped per project",
-    who: "Brands who want the craft of one of the five, shaped entirely around their own product, story and commerce.",
+    name: "Custom Build",
+    summary: "Rebuilt around your brand, start to finish",
+    icon: "layers",
+    price: 75000,
+    from: true,
+    unit: "starting",
+    who: "Brands who want the craft of one of the five shaped entirely around their own product and story.",
     includes: [
-      "A work chosen as the structural starting point",
+      "A template chosen as the structural starting point",
       "New identity, typography, colour and art direction",
-      "Rewritten information architecture and page set",
-      "Custom motion and interaction language",
+      "Information architecture and page set rewritten",
+      "Custom motion and interaction design",
       "3D or WebGL product experiences where they earn their place",
-      "CMS, e-commerce or bespoke back-end integration",
+      "E-commerce, CMS or bespoke back-end integration",
       "Performance budgets held through to launch",
       "Deployment, handover and clean source code",
     ],
-    delivery: "Scoped in a call. Most projects run 3 to 6 weeks.",
-    cta: { label: "Start a custom project", href: "/custom-build" },
+    delivery: "Scoped on a call. Most projects run 3 to 6 weeks.",
     emphasis: true,
   },
   {
     id: "exclusive",
-    index: "04",
-    name: "Exclusive",
-    short: "Exclusive licence",
-    priceFrom: null,
-    priceNote: "by quotation",
+    name: "Exclusive Licence",
+    summary: "Buy it outright and remove it from sale",
+    icon: "lock",
+    price: null,
+    from: false,
+    unit: "quoted",
     who: "Brands who need certainty that no competitor can ever run the same design.",
     includes: [
       "Sole ownership of the design",
-      "The work is permanently withdrawn from the collection",
-      "Removed from this site and never sold again",
+      "Permanently removed from this collection",
+      "Delisted from the site and never sold again",
       "Full source code and design files transferred",
       "Written exclusivity agreement",
       "Custom build and launch included in scope",
     ],
-    delivery: "Quoted per work. Availability is not guaranteed.",
-    cta: { label: "Request exclusivity", href: "/contact?intent=exclusive" },
+    delivery: "Quoted per template. Availability is not guaranteed.",
+  },
+  {
+    id: "care",
+    name: "Care Plan",
+    summary: "We keep it updated and improving",
+    icon: "wrench",
+    price: 15000,
+    from: true,
+    unit: "per month",
+    who: "Brands who want the site to keep improving after launch instead of quietly ageing.",
+    includes: [
+      "Content and section updates",
+      "Dependency, security and framework upkeep",
+      "Performance monitoring and regression fixes",
+      "Small feature and animation additions each month",
+      "Priority response within one working day",
+    ],
+    delivery: "Month to month. Cancel any time.",
   },
 ];
 
-export const carePlan = {
-  id: "care" as const,
-  name: "Care Plan",
-  priceFrom: 15000,
-  priceNote: "per month, cancel anytime",
-  who: "Brands who want the site to keep improving after launch instead of quietly ageing.",
-  includes: [
-    "Content and section updates",
-    "Dependency, security and framework upkeep",
-    "Performance monitoring and regression fixes",
-    "Small feature and animation additions each month",
-    "Priority response within one working day",
-  ],
-  cta: { label: "Add a care plan", href: "/contact?intent=care" },
-};
+export const buildPlans = plans.filter((p) => p.id !== "care");
+export const carePlan = plans.find((p) => p.id === "care")!;
 
 /**
- * The credit offer. This is the bridge from the secondary conversion
- * path (buy source) to the primary one (commission a build), so it is
- * surfaced wherever a source price is shown.
+ * The bridge from the cheap entry point to the real business: surfaced
+ * anywhere a source price appears.
  */
 export const upgradeCredit = {
   windowDays: 30,
-  headline: "Source code credited toward a custom build",
-  body: `Buy the source code and upgrade to a custom build within ${30} days, and we credit the full source-code price against your project. Nothing is wasted by starting small.`,
+  headline: "Source price credited toward a custom build",
+  body: "Buy the source code and upgrade to a custom build within 30 days, and we credit the full source-code price against your project. Starting small costs you nothing.",
 } as const;
 
-/** Budget bands offered in the enquiry form, aligned to the tiers above. */
 export const budgetBands = [
   "Under ₹25,000",
   "₹25,000 — ₹75,000",
@@ -147,16 +156,15 @@ export const budgetBands = [
   "Not sure yet",
 ] as const;
 
-export const serviceOptions = [
-  "Source code only",
-  "Setup & deployment",
-  "Full customisation",
-  "Exclusive licence",
-  "New pages or sections",
-  "E-commerce integration",
-  "CMS integration",
-  "3D / WebGL product experience",
+export const addOnOptions = [
+  "E-commerce / payments",
+  "CMS so my team can edit",
+  "3D / WebGL product viewer",
+  "Extra pages or sections",
   "Copywriting",
+  "Logo / brand identity",
+  "Product photography direction",
+  "Multi-language",
   "Ongoing care plan",
 ] as const;
 
@@ -166,18 +174,18 @@ const inr = new Intl.NumberFormat(site.market.locale, {
   maximumFractionDigits: 0,
 });
 
-/** ₹9,999 — used for all price display so formatting stays consistent. */
+/** ₹9,999 */
 export function formatPrice(value: number | null): string {
   if (value === null) return "On request";
   return inr.format(value);
 }
 
-/** "From ₹75,000" */
-export function formatFrom(value: number | null): string {
-  if (value === null) return "By quotation";
-  return `From ${inr.format(value)}`;
+/** "From ₹75,000" / "₹9,999" / "By quotation" */
+export function formatPlanPrice(plan: Plan): string {
+  if (plan.price === null) return "By quotation";
+  return `${plan.from ? "From " : ""}${inr.format(plan.price)}`;
 }
 
-export function getEngagement(id: EngagementId): Engagement | undefined {
-  return engagements.find((e) => e.id === id);
+export function getPlan(id: string): Plan | undefined {
+  return plans.find((p) => p.id === id);
 }

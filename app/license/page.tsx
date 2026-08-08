@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
-import { works } from "@/lib/works";
+import { templates } from "@/lib/templates";
 import { licenceFaq } from "@/lib/faq";
-import { engagements, formatFrom } from "@/lib/pricing";
-import { Faq } from "@/components/work/Faq";
-import { LineMask } from "@/components/primitives/LineMask";
+import { Faq } from "@/components/templates/Faq";
 import { Reveal } from "@/components/primitives/Reveal";
 import { ActionLink } from "@/components/primitives/ActionLink";
-import { RegistrationMark, SectionLabel, Arrow } from "@/components/primitives/Marks";
+import { Eyebrow, CheckMark, LockIcon } from "@/components/primitives/Marks";
 
 export const metadata: Metadata = {
-  title: "Licensing — what you may and may not do",
+  title: "Licence terms",
   description:
-    "Standard licence, exclusive licence, and exactly what is handed over. Written in plain language rather than defensive legalese.",
+    "What you may and may not do with the source code, what an exclusive licence guarantees, and exactly what is handed over. In plain language.",
   alternates: { canonical: "/license" },
 };
 
@@ -29,8 +27,7 @@ const notPermitted = [
   "Resell, sublicense or redistribute the source",
   "Repackage it as a template, theme or starter kit",
   "Use one licence across multiple production sites",
-  "Publish it to a public repository as your own work",
-  "Claim authorship of the original design",
+  "Publish it publicly as your own work",
 ];
 
 const handover = [
@@ -44,274 +41,211 @@ const handover = [
   },
   {
     title: "Assets",
-    body: "Placeholder art, poster frames and icons, all cleared for your use. Any raster assets in editable form where they exist.",
+    body: "Placeholder art, poster frames and icons, all cleared for your use, in editable form where they exist.",
   },
   {
     title: "Fonts",
-    body: "Open-source families are included and named. Commercially licensed families are listed with a purchase link — those licences must be bought in your own name, because they legally cannot be transferred.",
+    body: "Open-source families are included and named. Commercially licensed families are listed with a purchase link — those licences must be bought in your own name, because they cannot legally be transferred.",
   },
   {
     title: "Third-party services",
-    body: "Named, with the configuration documented. Accounts for hosting, commerce or email are created in your name so you are never renting access from us.",
+    body: "Named, with configuration documented. Accounts for hosting, commerce or email are created in your name, so you are never renting access from us.",
   },
 ];
 
 export default function LicensePage() {
-  const exclusive = engagements.find((e) => e.id === "exclusive")!;
-  const withdrawn = works.filter((w) => w.availability === "withdrawn");
+  const sold = templates.filter((t) => t.availability === "sold");
 
   return (
     <>
-      <section className="shell" aria-labelledby="licence-title">
-        <div className="flex items-center justify-between gap-4 border-b border-rule py-4">
-          <span className="meta text-ink">LICENSING</span>
-          <div className="flex items-center gap-4 sm:gap-8">
-            <RegistrationMark className="hidden sm:block" />
-            <span className="meta text-ink-muted">EDITION {site.edition}</span>
-          </div>
-        </div>
-
-        <div className="grid gap-y-10 pt-12 pb-16 lg:grid-cols-12 lg:gap-x-8 lg:pt-16">
+      <section className="shell pt-10 pb-8 sm:pt-14">
+        <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-7">
-            <h1 id="licence-title">
-              <LineMask
-                as="span"
-                mode="exhibition"
-                className="block font-display text-statement tracking-[-0.02em] text-ink"
-                lines={[
-                  "What you own,",
-                  <>
-                    in{" "}
-                    <span className="italic text-accent">plain words.</span>
-                  </>,
-                ]}
-              />
+            <Eyebrow>Licence</Eyebrow>
+            <h1 className="mt-4 font-display text-[clamp(2.25rem,4.4vw,3.5rem)] leading-[1.04] font-bold tracking-[-0.03em] text-ink">
+              What you own, in plain words.
             </h1>
-          </div>
-          <div className="lg:col-span-4 lg:col-start-9 lg:pt-3">
-            <Reveal as="p" variant="up" mode="archive" className="text-lede text-ink-soft">
+            <p className="mt-5 max-w-xl text-[1.0625rem] leading-relaxed text-ink-soft">
               This page is a summary written to be understood, not to protect us
-              from you. The signed agreement matches it. If anything here is
-              unclear, ask before you buy.
-            </Reveal>
+              from you. The signed agreement issued with your purchase says the
+              same things. If anything is unclear, ask before you buy.
+            </p>
+          </div>
+          <div className="lg:col-span-5 lg:text-right">
+            <ActionLink href="/buy" variant="primary" size="lg">
+              Place an order
+            </ActionLink>
           </div>
         </div>
       </section>
 
-      {/* ── standard licence ── */}
-      <section
-        id="standard"
-        className="shell scroll-mt-20 border-t border-rule section-y"
-        aria-labelledby="standard-title"
-      >
-        <div className="grid gap-y-10 lg:grid-cols-12 lg:gap-x-8">
-          <div className="lg:col-span-4">
-            <SectionLabel index="01">STANDARD LICENCE</SectionLabel>
-            <h2 id="standard-title" className="mt-6">
-              <LineMask
-                as="span"
-                mode="exhibition"
-                className="block font-display text-headline tracking-[-0.015em] text-ink"
-                lines={["One licence,", "one live site."]}
-              />
-            </h2>
-            <Reveal
-              as="p"
-              variant="up"
-              mode="archive"
-              className="mt-6 max-w-sm text-[0.9375rem] leading-relaxed text-ink-muted"
-            >
-              Included with every source-code purchase and with every Launch and
-              Custom project. Perpetual — there is nothing to renew and no key
-              that can be revoked.
-            </Reveal>
-          </div>
+      {/* ── standard ── */}
+      <section className="shell pb-12" aria-labelledby="standard-title">
+        <Eyebrow>Standard licence</Eyebrow>
+        <h2 id="standard-title" className="mt-4 font-display text-display font-bold text-ink">
+          One licence, one live site.
+        </h2>
+        <p className="mt-4 max-w-2xl text-[1rem] leading-relaxed text-ink-muted">
+          Included with every source-code purchase and with every Setup &amp;
+          Launch or Custom Build. Perpetual — there is nothing to renew and no
+          key that can be revoked.
+        </p>
 
-          <div className="grid gap-x-8 gap-y-10 lg:col-span-7 lg:col-start-6 lg:grid-cols-2">
-            <Reveal variant="rise" mode="archive">
-              <h3 className="meta border-b border-rule pb-4 text-ink">YOU MAY</h3>
-              <ul>
-                {permitted.map((item) => (
-                  <li key={item} className="flex gap-4 border-b border-rule py-3.5">
-                    <span
-                      aria-hidden="true"
-                      className="mt-2.5 block h-px w-3 shrink-0 bg-accent"
-                    />
-                    <span className="text-[0.9375rem] leading-snug text-ink-soft">
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </Reveal>
-
-            <Reveal variant="rise" mode="archive" delay={0.06}>
-              <h3 className="meta border-b border-rule pb-4 text-ink-muted">
-                YOU MAY NOT
-              </h3>
-              <ul>
-                {notPermitted.map((item) => (
-                  <li key={item} className="flex gap-4 border-b border-rule py-3.5">
-                    <span
-                      aria-hidden="true"
-                      className="mt-2 block h-2 w-2 shrink-0 rotate-45 border-t border-r border-ink-muted"
-                    />
-                    <span className="text-[0.9375rem] leading-snug text-ink-muted">
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ── exclusive licence ── */}
-      <section
-        id="exclusive"
-        className="on-void grain relative scroll-mt-20 overflow-hidden"
-        aria-labelledby="exclusive-title"
-      >
-        <span aria-hidden="true" className="grain-layer opacity-[0.12]" />
-        <div className="shell relative section-y">
-          <div className="grid gap-y-10 lg:grid-cols-12 lg:gap-x-8">
-            <div className="lg:col-span-5">
-              <SectionLabel index="02" tone="void">
-                EXCLUSIVE LICENCE
-              </SectionLabel>
-              <h2 id="exclusive-title" className="mt-6">
-                <LineMask
-                  as="span"
-                  mode="exhibition"
-                  className="block font-display text-headline tracking-[-0.015em] text-chalk"
-                  lines={[
-                    "Buy it, and it",
-                    <>
-                      leaves the{" "}
-                      <span className="italic text-accent">collection.</span>
-                    </>,
-                  ]}
-                />
-              </h2>
-              <Reveal
-                as="p"
-                variant="up"
-                mode="archive"
-                className="mt-7 measure text-[0.9375rem] leading-relaxed text-chalk-muted"
-              >
-                An exclusive licence transfers the design to you and permanently
-                withdraws it from sale. The work is delisted from this site,
-                never sold again, and its slot in the edition is closed. We keep
-                no right to reuse the design for another client.
-              </Reveal>
-              <Reveal variant="rise" mode="commerce" className="mt-8">
-                <ActionLink
-                  href="/contact?intent=exclusive"
-                  variant="accent"
-                  tone="void"
-                >
-                  Request exclusivity
-                </ActionLink>
-              </Reveal>
-              <Reveal as="p" variant="rise" mode="archive" className="mt-5 meta text-chalk-muted">
-                {formatFrom(exclusive.priceFrom).toUpperCase()} — {exclusive.delivery}
-              </Reveal>
-            </div>
-
-            <Reveal
-              as="dl"
-              variant="rise"
-              mode="archive"
-              group
-              className="border-t border-void-rule lg:col-span-6 lg:col-start-7"
-            >
-              {[
-                {
-                  t: "Delisted, publicly",
-                  d: "The work is marked withdrawn in the collection rather than quietly deleted, so the record of the edition stays honest.",
-                },
-                {
-                  t: "Written and dated",
-                  d: "Exclusivity is a signed agreement naming the work and the date it left the collection — not a promise in an email thread.",
-                },
-                {
-                  t: "Full transfer",
-                  d: "Source code, design files and the right to use the design however you want, including registering it as your own.",
-                },
-                {
-                  t: "Existing licences stand",
-                  d: "Anyone who legitimately bought the source before the exclusive sale keeps their licence. We tell you how many that is before you commit — currently none for every available work.",
-                },
-              ].map((item) => (
-                <div key={item.t} className="border-b border-void-rule py-6">
-                  <dt className="text-[1.0625rem] text-chalk">{item.t}</dt>
-                  <dd className="mt-2.5 measure text-[0.9375rem] leading-relaxed text-chalk-muted">
-                    {item.d}
-                  </dd>
-                </div>
+        <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          <Reveal variant="rise" mode="archive" className="card p-6 sm:p-7">
+            <h3 className="eyebrow text-endorse">You may</h3>
+            <ul className="mt-4 space-y-2.5">
+              {permitted.map((item) => (
+                <li key={item} className="flex gap-2.5">
+                  <CheckMark className="mt-0.5 shrink-0 text-endorse" />
+                  <span className="text-[0.9375rem] leading-snug text-ink-soft">
+                    {item}
+                  </span>
+                </li>
               ))}
-            </Reveal>
-          </div>
+            </ul>
+          </Reveal>
 
-          {/* the register — honest even when empty */}
-          <Reveal
-            variant="rise"
-            mode="archive"
-            className="mt-12 border-t border-void-rule pt-8"
-          >
-            <p className="meta text-chalk-muted">WITHDRAWN FROM EDITION {site.edition}</p>
-            {withdrawn.length === 0 ? (
-              <p className="mt-3 text-[0.9375rem] text-chalk-muted">
-                None yet. All {works.length} works are still available.
-              </p>
-            ) : (
-              <ul className="mt-3 space-y-2">
-                {withdrawn.map((work) => (
-                  <li key={work.slug} className="meta text-chalk">
-                    {work.number} — {work.name}
-                  </li>
-                ))}
-              </ul>
-            )}
+          <Reveal variant="rise" mode="archive" delay={0.06} className="card p-6 sm:p-7">
+            <h3 className="eyebrow text-ink-muted">You may not</h3>
+            <ul className="mt-4 space-y-2.5">
+              {notPermitted.map((item) => (
+                <li key={item} className="flex gap-2.5">
+                  <span
+                    aria-hidden="true"
+                    className="mt-2 block h-1 w-3 shrink-0 rounded-full bg-ink-faint"
+                  />
+                  <span className="text-[0.9375rem] leading-snug text-ink-muted">
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </Reveal>
         </div>
       </section>
 
-      {/* ── handover ── */}
-      <section
-        id="handover"
-        className="shell scroll-mt-20 border-t border-rule section-y"
-        aria-labelledby="handover-title"
-      >
-        <div className="grid gap-y-10 lg:grid-cols-12 lg:gap-x-8">
-          <div className="lg:col-span-4">
-            <SectionLabel index="03">HANDOVER</SectionLabel>
-            <h2 id="handover-title" className="mt-6">
-              <LineMask
-                as="span"
-                mode="exhibition"
-                className="block font-display text-headline tracking-[-0.015em] text-ink"
-                lines={["Exactly what", "arrives."]}
-              />
-            </h2>
-            <Reveal variant="rise" mode="archive" className="mt-6">
-              <Link href="/contact" className="link-rule meta text-ink">
-                Ask about anything here <Arrow />
-              </Link>
-            </Reveal>
+      {/* ── exclusive ── */}
+      <section id="exclusive" className="scroll-mt-28 px-2 sm:px-3" aria-labelledby="exclusive-title">
+        <div className="on-dark panel">
+          <div className="shell py-14 lg:py-20">
+            <div className="grid gap-8 lg:grid-cols-12">
+              <div className="lg:col-span-6">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-accent">
+                  <LockIcon />
+                </span>
+                <Eyebrow tone="accent" className="mt-5">
+                  Exclusive licence
+                </Eyebrow>
+                <h2
+                  id="exclusive-title"
+                  className="mt-4 font-display text-display font-bold text-white"
+                >
+                  Buy it, and it leaves the collection.
+                </h2>
+                <p className="mt-5 measure text-[1rem] leading-relaxed text-chalk-muted">
+                  An exclusive licence transfers the design to you and
+                  permanently withdraws it from sale. It is delisted from this
+                  site, never sold again, and its slot in the collection is
+                  closed. We keep no right to reuse the design for another
+                  client.
+                </p>
+                <div className="mt-8">
+                  <ActionLink href="/buy?plan=exclusive" variant="primary" size="lg">
+                    Request a quote
+                  </ActionLink>
+                </div>
+              </div>
+
+              <Reveal
+                as="dl"
+                variant="rise"
+                mode="archive"
+                group
+                className="divide-y divide-dark-rule border-t border-dark-rule lg:col-span-6"
+              >
+                {[
+                  {
+                    t: "Delisted publicly",
+                    d: "The template is marked as sold in the collection rather than quietly deleted, so the record stays honest.",
+                  },
+                  {
+                    t: "Written and dated",
+                    d: "Exclusivity is a signed agreement naming the template and the date it left the collection — not a promise in an email thread.",
+                  },
+                  {
+                    t: "Full transfer",
+                    d: "Source code, design files and the right to use the design however you want, including registering it as your own.",
+                  },
+                  {
+                    t: "Existing licences stand",
+                    d: "Anyone who legitimately bought the source before the exclusive sale keeps their licence. We tell you how many that is before you commit — currently none, for every available template.",
+                  },
+                ].map((item) => (
+                  <div key={item.t} className="py-5">
+                    <dt className="font-display text-[1.0625rem] font-bold text-white">
+                      {item.t}
+                    </dt>
+                    <dd className="mt-2 measure text-[0.9375rem] leading-relaxed text-chalk-muted">
+                      {item.d}
+                    </dd>
+                  </div>
+                ))}
+              </Reveal>
+            </div>
+
+            <div className="mt-10 border-t border-dark-rule pt-8">
+              <Eyebrow tone="dark">Sold exclusively so far</Eyebrow>
+              {sold.length === 0 ? (
+                <p className="mt-2 text-[0.9375rem] text-chalk-muted">
+                  None. All {templates.length} templates are still available.
+                </p>
+              ) : (
+                <ul className="mt-2 space-y-1">
+                  {sold.map((t) => (
+                    <li key={t.slug} className="text-[0.9375rem] text-white">
+                      {t.number} — {t.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── handover ── */}
+      <section id="handover" className="shell scroll-mt-28 section-y" aria-labelledby="handover-title">
+        <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
+          <div className="lg:sticky lg:top-28 lg:col-span-4 lg:self-start">
+            <Eyebrow>Handover</Eyebrow>
+            <h2
+              id="handover-title"
+              className="mt-4 font-display text-display font-bold text-ink"
+            >
+              Exactly what arrives.
+            </h2>
+            <Link
+              href="/contact"
+              className="link-rule mt-5 inline-block text-[0.9375rem] font-bold text-ink"
+            >
+              Ask about anything here
+            </Link>
+          </div>
+
           <Reveal
             as="dl"
             variant="rise"
             mode="archive"
             group
-            className="border-t border-rule lg:col-span-7 lg:col-start-6"
+            className="card divide-y divide-rule-soft overflow-hidden lg:col-span-8"
           >
             {handover.map((item) => (
-              <div key={item.title} className="border-b border-rule py-6">
-                <dt className="text-[1.0625rem] font-medium text-ink">{item.title}</dt>
-                <dd className="mt-2.5 measure text-[0.9375rem] leading-relaxed text-ink-muted">
+              <div key={item.title} className="px-5 py-6 sm:px-7">
+                <dt className="font-display text-[1.0625rem] font-bold text-ink">
+                  {item.title}
+                </dt>
+                <dd className="mt-2 measure text-[0.9375rem] leading-relaxed text-ink-muted">
                   {item.body}
                 </dd>
               </div>
@@ -322,21 +256,20 @@ export default function LicensePage() {
 
       <Faq
         items={licenceFaq}
-        index="04"
-        title={["Licence", "questions."]}
+        eyebrow="Licence"
+        title="Licence questions."
         lead={`Anything not covered here, write to ${site.contact.email} and we will answer before you buy.`}
         id="licence-faq"
       />
 
-      {/* ── legal footnote ── */}
-      <section className="shell border-t border-rule py-12">
-        <p className="measure meta leading-relaxed text-ink-muted">
-          This page is a plain-language summary and is provided for clarity. The
-          signed licence agreement issued with your purchase is the governing
-          document, and it is written to say the same things. Refunds are
-          handled case by case: source-code purchases are not refundable once
-          repository access has been granted, because they cannot be returned —
-          which is why we publish live demos and answer questions first.
+      <section className="shell pb-16">
+        <p className="measure text-[0.8125rem] leading-relaxed text-ink-muted">
+          This page is a plain-language summary provided for clarity. The signed
+          licence agreement issued with your purchase is the governing document,
+          and it is written to say the same things. Source-code purchases are not
+          refundable once repository access has been granted, because they cannot
+          be returned — which is why we publish live demos and answer questions
+          first. Service work that has not started is refundable in full.
         </p>
       </section>
     </>

@@ -1,61 +1,52 @@
 /**
- * EDITION 001 — the collection.
+ * THE COLLECTION — five premium website templates.
  *
- * All five works live here as structured data. Components read from this
- * file only; no work-specific copy is scattered through the UI. Adding a
- * sixth work means appending one entry — every route, index, rail tick and
- * related-works block picks it up automatically.
+ * All five live here as structured data. Components read from this file
+ * only; no template-specific copy is scattered through the UI. Adding a
+ * sixth means appending one entry — every route, listing, order form option,
+ * sitemap entry and JSON-LD product picks it up automatically.
  *
  * MEDIA CONVENTIONS
  *   poster        Required. Ships as an art-directed SVG in /public/works.
- *                 Replace with an exported .webp/.avif frame of the real
- *                 build when available, and update `posterAspect` if the
- *                 crop changes.
- *   previewVideo  Optional. Drop an H.264/MP4 (and optional WebM) at
- *                 /public/works/<slug>/preview.mp4 and set the path here.
- *                 Target: 8-12s loop, no audio, <= 1.5 MB, 1280px wide.
- *                 Null is fully supported — the poster simply stands alone.
+ *                 Replace with an exported frame of the real build (.avif
+ *                 or .webp, 1600x1000) when available.
+ *   previewVideo  Optional. Drop an MP4 at /public/works/<slug>/preview.mp4
+ *                 and set the path here. Target an 8-12s silent loop,
+ *                 1280px wide, under 1.5 MB. `null` is fully supported.
  *   liveDemo      Optional. External URL, opened in a new tab.
  */
 
-export type Availability = "available" | "reserved" | "withdrawn";
+export type Availability = "available" | "reserved" | "sold";
 
-export type WorkTheme = {
-  /** Ground colour of the work's own visual world. */
+export type TemplateTheme = {
+  /** Ground colour of the template's own visual world. */
   ground: string;
-  /** The work's accent, used only inside preview surfaces and small marks. */
+  /** Its accent, used only inside preview surfaces and small marks. */
   accent: string;
-  /** Text colour that sits correctly on `ground`. */
-  onGround: string;
-  /** True when the work's world is dark — drives caption contrast. */
   dark: boolean;
-  /** Three words that describe the work's atmosphere. */
+  /** Three words describing the atmosphere. */
   mood: string;
 };
 
-export type PerformanceFact = {
-  label: string;
-  value: string;
-};
-
-export type Work = {
+export type Template = {
   slug: string;
-  /** Archive number, e.g. "001". */
+  /** Display number, e.g. "01". */
   number: string;
   name: string;
   industry: string;
-  /** Sector line used in archive metadata, e.g. "JEWELLERY / COMMERCE". */
-  classification: string;
-  /** One-line positioning statement. */
-  positioning: string;
-  /** One-line design philosophy, shown in the collection sequence. */
-  philosophy: string;
-  /** Two or three paragraphs on the design concept. */
+  category: string;
+  /** The commercial promise, in one line. */
+  tagline: string;
+  /** The design idea, in one line. */
+  pitch: string;
+  /** Who should buy this. */
+  bestFor: string[];
+  /** Three concrete reasons it sells. */
+  highlights: { title: string; body: string }[];
   concept: string[];
-  theme: WorkTheme;
+  theme: TemplateTheme;
   poster: string;
   posterAlt: string;
-  /** width/height of the poster asset, used to reserve space. */
   posterAspect: [number, number];
   previewVideo: string | null;
   liveDemo: string | null;
@@ -64,55 +55,64 @@ export type Work = {
   pages: string[];
   features: string[];
   interactions: { title: string; body: string }[];
-  performance: PerformanceFact[];
+  performance: { label: string; value: string }[];
   sourcePrice: number;
   customFrom: number;
   exclusiveAvailable: boolean;
   availability: Availability;
-  /** Marks the work given an expanded case-study moment on the homepage. */
   featured?: boolean;
 };
 
-export const works: Work[] = [
+export const templates: Template[] = [
   {
     slug: "aurvi",
-    number: "001",
+    number: "01",
     name: "Aurvi",
     industry: "Fine jewellery",
-    classification: "Jewellery / Commerce",
-    positioning:
-      "A jewellery store where the stone can be picked up, turned, and inspected before it is bought.",
-    philosophy:
-      "Jewellery is bought with the eyes and the hands. One of those was missing online.",
+    category: "Jewellery & Luxury Retail",
+    tagline:
+      "Let customers turn a diamond in their hands before they buy it.",
+    pitch: "Jewellery is bought with the eyes and the hands. Online, one of those was missing.",
+    bestFor: [
+      "Jewellery and watch brands",
+      "Made-to-order and bespoke pieces",
+      "High-value single products",
+      "Showroom brands going online",
+    ],
+    highlights: [
+      {
+        title: "A 3D viewer that closes sales",
+        body: "Customers rotate the stone, change the metal and watch light move across the facets. It answers the question that normally sends them to a showroom — or closes the tab.",
+      },
+      {
+        title: "Built for high-value carts",
+        body: "Certification panels, hallmark detail, care instructions and a bespoke enquiry route, because a ₹2,00,000 purchase needs more reassurance than a buy button.",
+      },
+      {
+        title: "Fewer returns, less doubt",
+        body: "Returns come from the gap between what a customer imagined and what arrived. Letting them inspect the real geometry first narrows it.",
+      },
+    ],
     concept: [
       "Aurvi begins from a commercial problem, not a visual one. A solitaire photographed under studio lighting looks identical across every jeweller in the country. The customer cannot judge cut, depth, or how light actually moves through the stone — so they hesitate, or they go to a showroom.",
       "The build answers that with a real-time 3D product view. The stone sits in the centre of a dark, controlled room. The customer rotates it, changes the metal, changes the setting, and watches the facets respond to light exactly as they would across a counter. Nothing is a rendered video; it is the product itself, live.",
-      "Everything else in the interface withdraws to make that possible. The palette is near-black and warm. Type is small, confident and mostly out of the way. There is no carousel, no badge, no urgency banner. The stone is the only bright object on the page.",
+      "Everything else in the interface withdraws to make that possible. The palette is near-black and warm. Type is small and mostly out of the way. There is no carousel, no badge, no urgency banner. The stone is the only bright object on the page.",
     ],
     theme: {
       ground: "#0b0a09",
       accent: "#e8c98a",
-      onGround: "#f2ede4",
       dark: true,
       mood: "Dark, cinematic, tactile",
     },
     poster: "/works/aurvi.svg",
     posterAlt:
-      "Aurvi preview — a faceted solitaire diamond catching light against a near-black studio ground, with fine caustic lines beneath it.",
+      "Aurvi template preview — a faceted solitaire diamond catching light against a near-black studio ground.",
     posterAspect: [1600, 1000],
     previewVideo: null,
     liveDemo:
       "https://raw.githack.com/amanjaiman1/Product_3D/aurvi-jewellery-demo/index.html",
-    liveDemoNote:
-      "Opens the live 3D product experience in a new tab. Best on a desktop browser.",
-    technology: [
-      "Next.js",
-      "TypeScript",
-      "Three.js",
-      "GSAP",
-      "Custom GLSL",
-      "Tailwind CSS",
-    ],
+    liveDemoNote: "Opens the live 3D product experience in a new tab. Best on desktop.",
+    technology: ["Next.js", "TypeScript", "Three.js", "GSAP", "Custom GLSL", "Tailwind CSS"],
     pages: [
       "Home — cinematic entry",
       "Collection listing with filters",
@@ -136,7 +136,7 @@ export const works: Work[] = [
     interactions: [
       {
         title: "Inspect, don't scroll",
-        body: "Drag anywhere on the stone to orbit it. Momentum carries and settles. Double-tap or press to return to the hero angle, so a customer can never get lost in the model.",
+        body: "Drag anywhere on the stone to orbit it. Momentum carries and settles. Press to return to the hero angle, so a customer can never get lost in the model.",
       },
       {
         title: "Material change without reload",
@@ -144,7 +144,7 @@ export const works: Work[] = [
       },
       {
         title: "Light as a control",
-        body: "A single slow key light drifts across the facets. It reads as atmosphere, but its real job is showing brilliance — the thing a photograph flattens.",
+        body: "A slow key light drifts across the facets. It reads as atmosphere, but its real job is showing brilliance — the thing a photograph flattens.",
       },
       {
         title: "Graceful floor",
@@ -167,13 +167,32 @@ export const works: Work[] = [
 
   {
     slug: "kinetic",
-    number: "002",
+    number: "02",
     name: "Kinetic",
-    industry: "Performance mobility",
-    classification: "Automotive / Mobility",
-    positioning:
-      "A performance brand site built with the precision of the engineering it sells.",
-    philosophy: "Speed is not a blur effect. It is accuracy at every step.",
+    industry: "Automotive & mobility",
+    category: "Automotive & Performance",
+    tagline: "A performance brand site with the precision of the engineering it sells.",
+    pitch: "Speed is not a blur effect. It is accuracy at every step.",
+    bestFor: [
+      "Car, bike and EV brands",
+      "Performance parts and tuning",
+      "Dealerships and test-drive booking",
+      "Any product sold on specifications",
+    ],
+    highlights: [
+      {
+        title: "Specs that actually persuade",
+        body: "Figures are set like instrumentation — tabular, monospaced, stepped into place. The number gets the attention instead of the animation around it.",
+      },
+      {
+        title: "A configurator people finish",
+        body: "Trim, wheels and finish change instantly with no reload, and the state lives in the URL so a customer can send their build to someone else.",
+      },
+      {
+        title: "Test drives, booked",
+        body: "A validated booking form and a searchable dealer locator, because the point of the site is getting someone into the seat.",
+      },
+    ],
     concept: [
       "Most automotive sites reach for motion blur and lens flare, which reads as marketing. Kinetic goes the other way: it borrows from instrumentation. Numbers are tabular and monospaced. Specifications are drawn like a data sheet. Rules and tick marks measure the layout the way a gauge measures a range.",
       "The energy comes from timing rather than decoration. Sections arrive on a hard, mechanical curve. Counters step to their value rather than easing into it. Nothing floats.",
@@ -182,13 +201,12 @@ export const works: Work[] = [
     theme: {
       ground: "#e8e5df",
       accent: "#d8360e",
-      onGround: "#121110",
       dark: false,
       mood: "Mechanical, precise, energetic",
     },
     poster: "/works/kinetic.svg",
     posterAlt:
-      "Kinetic preview — a technical drawing of a brake rotor arc over measured horizontal rules and a vermilion velocity slash.",
+      "Kinetic template preview — a technical drawing of a brake rotor over measured rules with a vermilion velocity slash.",
     posterAspect: [1600, 1000],
     previewVideo: null,
     liveDemo: null,
@@ -241,28 +259,46 @@ export const works: Work[] = [
 
   {
     slug: "monolith",
-    number: "003",
+    number: "03",
     name: "Monolith",
     industry: "Architecture & interiors",
-    classification: "Architecture / Studio",
-    positioning:
-      "A practice portfolio that treats the page as a plan and the scroll as a walk through the building.",
-    philosophy: "Architecture is organised space. So is a good page.",
+    category: "Architecture & Design Studios",
+    tagline: "A portfolio that presents buildings as spaces, not thumbnails.",
+    pitch: "Architecture is organised space. So is a good page.",
+    bestFor: [
+      "Architecture and interior studios",
+      "Property developers",
+      "Photographers and galleries",
+      "Any practice sold on its portfolio",
+    ],
+    highlights: [
+      {
+        title: "Projects at full scale",
+        body: "Each project gets the whole screen instead of a grid cell, so the work is judged the way it deserves to be.",
+      },
+      {
+        title: "Drawings treated as content",
+        body: "Plans and photographs pair properly with margin annotations, so the craft of the practice is visible, not just the render.",
+      },
+      {
+        title: "Restraint that reads as confidence",
+        body: "Almost no motion by design. For a studio whose value is judgement, the absence of decoration is the strongest argument on the page.",
+      },
+    ],
     concept: [
       "Architecture studios are usually given a grid of thumbnails, which is the least architectural way to present a building. Monolith is built as a sequence of spaces instead. Projects arrive at full height. Captions sit where a drawing would annotate them. Column guides stay faintly visible, as they would on a working sheet.",
-      "Type does the heavy structural work: a single large grotesque, set tight, occasionally allowed to run past the edge of the frame the way a title block runs off a print.",
+      "Type does the heavy structural work: a single large face, set tight, occasionally allowed to run past the edge of the frame the way a title block runs off a print.",
       "Motion is almost entirely absent. Images do not fade in decoratively; they are simply already there, cropped with intent. The restraint is the argument — this studio does not need to animate to hold your attention.",
     ],
     theme: {
       ground: "#cdc8bf",
       accent: "#1c1a17",
-      onGround: "#16130f",
       dark: false,
       mood: "Editorial, spatial, brutalist",
     },
     poster: "/works/monolith.svg",
     posterAlt:
-      "Monolith preview — hard-edged concrete masses casting long diagonal shadows, overlaid with fine architectural plan hairlines.",
+      "Monolith template preview — concrete masses casting long diagonal shadows with architectural plan hairlines.",
     posterAspect: [1600, 1000],
     previewVideo: null,
     liveDemo: null,
@@ -289,11 +325,11 @@ export const works: Work[] = [
     interactions: [
       {
         title: "Plan-line grid",
-        body: "Column guides fade in as a section is entered and out as it leaves, at very low opacity. It is the only ornament in the build, and it is borrowed from a working drawing.",
+        body: "Column guides fade in as a section is entered and out as it leaves, at very low opacity. It is the only ornament in the build, borrowed from a working drawing.",
       },
       {
         title: "Cropped, not centred",
-        body: "Images are deliberately cut by the frame edge. It makes a photograph feel like part of a larger space rather than a product shot.",
+        body: "Images are deliberately cut by the frame edge, so a photograph feels like part of a larger space rather than a product shot.",
       },
       {
         title: "Caption as annotation",
@@ -315,28 +351,46 @@ export const works: Work[] = [
 
   {
     slug: "velora",
-    number: "004",
+    number: "04",
     name: "Velora",
     industry: "Skincare & fragrance",
-    classification: "Beauty / Commerce",
-    positioning:
-      "A skincare and fragrance store that sells how a product feels, not how its bottle photographs.",
-    philosophy: "You cannot photograph a scent. You can build the room it belongs to.",
+    category: "Beauty & E-commerce",
+    tagline: "A skincare store that sells how a product feels, then proves it.",
+    pitch: "You cannot photograph a scent. You can build the room it belongs to.",
+    bestFor: [
+      "Skincare and cosmetics brands",
+      "Fragrance and candle makers",
+      "Wellness and supplements",
+      "Subscription and refill products",
+    ],
+    highlights: [
+      {
+        title: "Atmosphere that converts",
+        body: "Warm, sensory art direction drawn from raw materials rather than packaging — then it gets out of the way of the ingredient list, which is what actually closes a considered buyer.",
+      },
+      {
+        title: "A routine builder",
+        body: "Customers drag products into a morning and evening sequence with conflicts flagged. It answers the real question — what do I use, and in what order — and it raises basket size honestly.",
+      },
+      {
+        title: "Shopify-ready commerce",
+        body: "Storefront API integration, subscriptions, reorder flow and sample selection at checkout. Real retail plumbing, not a pretty shell.",
+      },
+    ],
     concept: [
       "Fragrance and skincare are sensory purchases described with words the customer cannot verify. Velora treats that honestly: instead of claiming, it creates atmosphere and then gets out of the way of the ingredient list.",
       "The palette is drawn from raw material rather than packaging — clay, oil, resin, unbleached paper. Surfaces are soft and warm. Transitions between products dissolve rather than slide, so browsing feels like moving through air.",
-      "Underneath the atmosphere it is a disciplined commerce build. Ingredients, concentrations, skin-type guidance and routine sequencing are all first-class content, because that is what actually converts a considered buyer.",
+      "Underneath the atmosphere it is a disciplined commerce build. Ingredients, concentrations, skin-type guidance and routine sequencing are all first-class content, because that is what converts a considered buyer.",
     ],
     theme: {
       ground: "#e3d3c6",
       accent: "#9d5a3f",
-      onGround: "#3a2419",
       dark: false,
       mood: "Sensory, organic, atmospheric",
     },
     poster: "/works/velora.svg",
     posterAlt:
-      "Velora preview — soft clay and blush forms dissolving into one another behind the fine contour of a serum droplet.",
+      "Velora template preview — soft clay and blush forms dissolving behind the contour of a serum droplet.",
     posterAspect: [1600, 1000],
     previewVideo: null,
     liveDemo: null,
@@ -363,7 +417,7 @@ export const works: Work[] = [
     interactions: [
       {
         title: "Dissolve, not slide",
-        body: "Moving between products cross-fades on a long curve. It reads as atmosphere and, practically, avoids the jarring reflow of a carousel.",
+        body: "Moving between products cross-fades on a long curve. It reads as atmosphere and avoids the jarring reflow of a carousel.",
       },
       {
         title: "Routine builder",
@@ -389,28 +443,46 @@ export const works: Work[] = [
 
   {
     slug: "orbital",
-    number: "005",
+    number: "05",
     name: "Orbital",
     industry: "Technology & AI",
-    classification: "Technology / Platform",
-    positioning:
-      "A technology company site that explains a complicated product without diluting it.",
-    philosophy: "Intelligence looks like clarity, not like a glowing gradient.",
+    category: "SaaS & Technology",
+    tagline: "Explain a complicated product without watering it down.",
+    pitch: "Intelligence looks like clarity, not like a glowing gradient.",
+    bestFor: [
+      "SaaS and AI products",
+      "Developer tools and APIs",
+      "Fintech and infrastructure",
+      "Anyone selling to technical buyers",
+    ],
+    highlights: [
+      {
+        title: "Two buyers, one scroll",
+        body: "Built to satisfy the engineer evaluating architecture and the executive approving spend, without switching voice halfway down the page.",
+      },
+      {
+        title: "Docs that feel like the product",
+        body: "A documentation shell with sidebar, search and MDX changelog sharing the marketing type system — so a developer arriving from search never feels handed to a different company.",
+      },
+      {
+        title: "Diagrams that survive mobile",
+        body: "Architecture diagrams reflow to a labelled vertical stack instead of becoming a pinch-to-zoom image. Most technical sites fail exactly here.",
+      },
+    ],
     concept: [
       "Technology sites tend to hide thin thinking behind gradients and abstract 3D. Orbital assumes the opposite problem: the product is genuinely sophisticated and the site's job is to make it legible to a technical buyer and a commercial one in the same scroll.",
       "The build is cool, close to monochrome, and heavily systematised. Diagrams are drawn as real diagrams. Architecture is shown as architecture. Documentation-grade typography sits beside marketing type without a change of voice.",
-      "One restrained motif carries the brand: a set of concentric orbits with a single bright node. It appears in the hero, as a section marker, and as the loading state — one idea, used consistently, instead of five unrelated effects.",
+      "One restrained motif carries the brand: a set of concentric orbits with a single bright node. It appears in the hero, as a section marker, and as the loading state — one idea used consistently instead of five unrelated effects.",
     ],
     theme: {
       ground: "#101318",
       accent: "#5b8cff",
-      onGround: "#e8ecf4",
       dark: true,
       mood: "Futuristic, intelligent, minimal",
     },
     poster: "/works/orbital.svg",
     posterAlt:
-      "Orbital preview — concentric orbit rings over a precise node grid, with a single luminous blue point on the outer path.",
+      "Orbital template preview — concentric orbit rings over a node grid with a single luminous blue point.",
     posterAspect: [1600, 1000],
     previewVideo: null,
     liveDemo: null,
@@ -465,32 +537,31 @@ export const works: Work[] = [
 
 /** Honest, shared statement used wherever performance is discussed. */
 export const performanceStatement =
-  "Every work is performance-tested on a mid-range Android device and a throttled connection before delivery. We publish the techniques rather than a screenshot of a score, because a score measured on our hardware tells you nothing about yours.";
+  "Every template is tested on a mid-range Android device and a throttled connection before delivery. We publish the techniques rather than a screenshot of a score, because a score measured on our hardware tells you nothing about yours.";
 
-export function getWork(slug: string): Work | undefined {
-  return works.find((w) => w.slug === slug);
+export function getTemplate(slug: string): Template | undefined {
+  return templates.find((t) => t.slug === slug);
 }
 
-export function getFeaturedWork(): Work {
-  return works.find((w) => w.featured) ?? works[0];
+export function getFeaturedTemplate(): Template {
+  return templates.find((t) => t.featured) ?? templates[0];
 }
 
-/** Related works: the rest of the collection, in order, wrapping around. */
-export function getRelatedWorks(slug: string, count = 2): Work[] {
-  const index = works.findIndex((w) => w.slug === slug);
-  if (index === -1) return works.slice(0, count);
-  const ordered = [...works.slice(index + 1), ...works.slice(0, index)];
-  return ordered.slice(0, count);
+/** The rest of the collection, in order, wrapping around. */
+export function getRelatedTemplates(slug: string, count = 2): Template[] {
+  const index = templates.findIndex((t) => t.slug === slug);
+  if (index === -1) return templates.slice(0, count);
+  return [...templates.slice(index + 1), ...templates.slice(0, index)].slice(0, count);
 }
 
-export function getAdjacentWork(slug: string, direction: 1 | -1): Work {
-  const index = works.findIndex((w) => w.slug === slug);
-  const next = (index + direction + works.length) % works.length;
-  return works[next];
+export function getAdjacentTemplate(slug: string, direction: 1 | -1): Template {
+  const index = templates.findIndex((t) => t.slug === slug);
+  const next = (index + direction + templates.length) % templates.length;
+  return templates[next];
 }
 
 export const availabilityLabel: Record<Availability, string> = {
-  available: "Available",
+  available: "Available now",
   reserved: "Reserved",
-  withdrawn: "Withdrawn — sold exclusively",
+  sold: "Sold exclusively",
 };

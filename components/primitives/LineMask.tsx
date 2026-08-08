@@ -24,7 +24,7 @@ export function LineMask({
   as: Tag = "span",
   className,
   lineClassName,
-  mode = "exhibition",
+  mode = "reveal",
   delay,
 }: LineMaskProps) {
   return (
