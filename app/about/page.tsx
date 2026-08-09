@@ -7,7 +7,7 @@ import { Eyebrow } from "@/components/primitives/Marks";
 
 export const metadata: Metadata = {
   title: "About",
-  description: `Why ${site.name} sells five website templates instead of five hundred, how we work, and what we will not pretend about.`,
+  description: `Why ${site.name} sells ${site.templateCountWord} website templates instead of five hundred, how we work, and what we will not pretend about.`,
   alternates: { canonical: "/about" },
 };
 
@@ -18,7 +18,7 @@ const beliefs = [
   },
   {
     title: "Interaction should answer a question",
-    body: "A 3D viewer that lets someone judge a diamond's cut is worth building. The same viewer spinning a logo is a loading screen with extra steps. We ask what buying question an interaction removes before we build it.",
+    body: "A draggable before-and-after on an interiors project earns its place: it answers the question the client actually has. A 3D logo spinning in a hero is a loading screen with extra steps. We ask what buying question an interaction removes before we build it.",
   },
   {
     title: "Restraint is the harder skill",
@@ -63,7 +63,7 @@ export default function AboutPage() {
             <h1 className="mt-4 font-display text-[clamp(2.25rem,4.4vw,3.5rem)] leading-[1.04] font-bold tracking-[-0.03em] text-ink">
               {site.templateCountWord.charAt(0).toUpperCase() +
                 site.templateCountWord.slice(1)}{" "}
-              templates, because five is what we could make this good.
+              templates, because that is what we could make this good.
             </h1>
           </div>
           <div className="lg:col-span-4 lg:text-right">
@@ -98,11 +98,11 @@ export default function AboutPage() {
               means every one had to justify existing — a different industry, a
               different visual world, a different central interaction. It also
               means we cannot hide a weak one in a grid, and that we know all
-              five well enough to support them properly.
+              them well enough to support them properly.
             </p>
             <p>
               The trade-off is real and we will not pretend otherwise: if none of
-              the five suits your brand, there is no sixth to browse. That is
+              them suits your brand, there is no next one to browse. That is
               exactly when a custom build stops being an upsell and starts being
               the actual product — the templates are the portfolio, and the
               portfolio is the argument for hiring us.

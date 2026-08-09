@@ -81,7 +81,7 @@ export const plans: Plan[] = [
     price: 75000,
     from: true,
     unit: "starting",
-    who: "Brands who want the craft of one of the five shaped entirely around their own product and story.",
+    who: "Brands who want the craft of one of the templates shaped entirely around their own product and story.",
     includes: [
       "A template chosen as the structural starting point",
       "New identity, typography, colour and art direction",

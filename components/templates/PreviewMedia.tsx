@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import type { Template } from "@/lib/templates";
 import { hasFinePointer, isLowPowerDevice } from "@/lib/motion";
 import { PlayMark } from "@/components/primitives/Marks";
@@ -22,13 +23,16 @@ type PreviewMediaProps = {
 /**
  * Poster first, always.
  *
- * The poster is a real, sized image so the box never shifts. Preview video is
- * a progressive enhancement: the <video> element is not created until it is
- * wanted, never downloads on a low-power or metered connection until asked,
- * and pauses the moment it leaves the viewport or the tab is hidden.
+ * Posters are real frames captured from the live demos, so they go through
+ * `next/image`: AVIF and WebP variants, a responsive srcset from the `sizes`
+ * hint, and a reserved box that cannot shift. `fill` is used because the frame
+ * itself owns the aspect ratio — the crop changes per placement.
  *
- * Works with `previewVideo: null` — the poster simply stands alone, which is
- * the current state of the collection.
+ * Preview video stays a progressive enhancement: the <video> element is not
+ * created until it is wanted, never downloads on a low-power or metered
+ * connection until asked, and pauses the moment it leaves the viewport or the
+ * tab is hidden. Works with `previewVideo: null`, which is the current state —
+ * the poster simply stands alone.
  */
 export function PreviewMedia({
   template,
@@ -36,7 +40,7 @@ export function PreviewMedia({
   priority = false,
   className = "",
   children,
-  sizes,
+  sizes = "100vw",
 }: PreviewMediaProps) {
   const [ratioW, ratioH] = template.posterAspect;
   const hasVideo = Boolean(template.previewVideo);
@@ -114,19 +118,14 @@ export function PreviewMedia({
       onPointerEnter={hasVideo && hasFinePointer() ? start : undefined}
       onPointerLeave={hasVideo && hasFinePointer() ? stop : undefined}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- posters ship as
-          pre-optimised SVG; the image optimiser cannot improve on them and
-          would only add a request. Swap to next/image with raster art. */}
-      <img
+      <Image
         src={template.poster}
         alt={template.posterAlt}
-        width={ratioW}
-        height={ratioH}
+        fill
         sizes={sizes}
-        loading={priority ? "eager" : "lazy"}
-        decoding={priority ? "sync" : "async"}
-        fetchPriority={priority ? "high" : "auto"}
-        className="zoom-media absolute inset-0 h-full w-full object-cover"
+        priority={priority}
+        loading={priority ? undefined : "lazy"}
+        className="zoom-media object-cover"
       />
 
       {mounted && template.previewVideo && (

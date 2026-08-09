@@ -24,8 +24,8 @@ const reasons = [
   },
   {
     Icon: RocketIcon,
-    title: "You can try one before you pay",
-    body: "The Aurvi 3D product experience is live and public. Open it, break it, run an audit on it. We would rather you tested the work than trusted a screenshot of a score.",
+    title: "You can try all of them before you pay",
+    body: "Every template has a public live demo. Open it on your phone, break it, run your own Lighthouse audit. We would rather you tested the work than trusted a screenshot of a score.",
   },
   {
     Icon: LockIcon,
@@ -55,8 +55,9 @@ export function WhyUs() {
               </h2>
             </div>
             <p className="text-[1rem] leading-relaxed text-chalk-muted lg:col-span-5">
-              We sell five things and we know all five inside out. That is the
-              trade-off we picked, and it is the reason support actually works.
+              We sell a handful of things and we know all of them inside out.
+              That is the trade-off we picked, and it is the reason support
+              actually works.
             </p>
           </div>
 

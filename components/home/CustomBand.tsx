@@ -37,7 +37,7 @@ export function CustomBand() {
               Start with a template. End with something only yours.
             </h2>
             <p className="mt-5 measure text-[1.0625rem] leading-relaxed text-ink-soft">
-              A custom build takes one of the five as its structural and
+              A custom build takes one of the templates as its structural and
               engineering foundation, then rebuilds everything above it around
               your brand. You get the standard of a long agency engagement
               without paying for the weeks where nobody knows what it should
@@ -95,7 +95,7 @@ export function CustomBand() {
                 Or start from nothing
               </p>
               <p className="mt-2 text-[0.875rem] leading-relaxed text-ink-muted">
-                If none of the five is the right shape, we design from scratch.
+                If none of them is the right shape, we design from scratch.
                 Same standard, quoted per project.
               </p>
             </div>

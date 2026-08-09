@@ -28,7 +28,7 @@ export default function TemplatesPage() {
           <div className="lg:col-span-7">
             <Eyebrow>Templates</Eyebrow>
             <h1 className="mt-4 font-display text-[clamp(2.25rem,4.4vw,3.5rem)] leading-[1.04] font-bold tracking-[-0.03em] text-ink">
-              {site.templateCount} templates, five kinds of business.
+              {site.templateCount} templates. Every one has a live demo.
             </h1>
             <p className="mt-5 max-w-xl text-[1.0625rem] leading-relaxed text-ink-soft">
               Each is a complete build, not a landing page. Open a live demo,
@@ -159,7 +159,7 @@ export default function TemplatesPage() {
             <div className="lg:col-span-8">
               <Eyebrow tone="accent">If none of them fit</Eyebrow>
               <h2 className="mt-4 font-display text-[clamp(1.75rem,2.8vw,2.5rem)] leading-tight font-bold text-white">
-                Five templates cannot cover every business. That is what custom
+                A short collection cannot cover every business. That is what custom
                 builds are for.
               </h2>
               <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2">

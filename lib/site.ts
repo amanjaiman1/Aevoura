@@ -3,7 +3,11 @@
  *
  * Brand, contact and commercial promises live here. Rename the business or
  * change the email once and it updates everywhere.
+ *
+ * Collection size is derived from lib/templates.ts, never written down twice.
  */
+
+import { templates, templateCount, templateCountWord } from "./templates";
 
 export const site = {
   name: "Aevoura",
@@ -11,12 +15,11 @@ export const site = {
   url: "https://aevoura.com",
 
   tagline: "Premium website templates, built to launch",
-  description:
-    "Five premium website templates, engineered end to end. Buy the source, have us launch it, or commission a custom build around your brand. Delivered from India, working worldwide.",
+  description: `${templateCountWord.charAt(0).toUpperCase()}${templateCountWord.slice(1)} premium website templates, engineered end to end, each with a live demo you can try. Buy the source, have us launch it, or commission a custom build around your brand. Built in India, working worldwide.`,
 
-  /** The collection is finite on purpose. Used as a curation signal. */
-  templateCount: 5,
-  templateCountWord: "five",
+  /** Derived from the collection, so it can never drift out of date. */
+  templateCount,
+  templateCountWord,
 
   contact: {
     /** Every order and enquiry lands here. */
@@ -86,13 +89,13 @@ export const primaryNav: NavItem[] = [
 export const footerNav: { title: string; items: NavItem[] }[] = [
   {
     title: "Templates",
+    // Derived, so removing or adding a template can never leave a dead link.
     items: [
-      { label: "All five templates", href: "/templates" },
-      { label: "Aurvi — Fine jewellery", href: "/templates/aurvi" },
-      { label: "Kinetic — Automotive", href: "/templates/kinetic" },
-      { label: "Monolith — Architecture", href: "/templates/monolith" },
-      { label: "Velora — Skincare", href: "/templates/velora" },
-      { label: "Orbital — Technology", href: "/templates/orbital" },
+      { label: `All ${templateCount} templates`, href: "/templates" },
+      ...templates.map((template) => ({
+        label: `${template.name} — ${template.industry}`,
+        href: `/templates/${template.slug}`,
+      })),
     ],
   },
   {

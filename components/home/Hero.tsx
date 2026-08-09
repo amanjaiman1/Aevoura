@@ -24,8 +24,12 @@ export function Hero() {
   const cheapestCustom = Math.min(...templates.map((t) => t.customFrom));
   const liveCount = templates.filter((t) => t.liveDemo).length;
 
-  /** Front card last so it paints on top. */
-  const fan = [templates[2], templates[1], featured];
+  /**
+   * Up to three previews, front card last so it paints on top. Built from
+   * whatever the collection actually holds, so it cannot break when a template
+   * is added or removed.
+   */
+  const fan = [...templates.filter((t) => t.slug !== featured.slug).slice(0, 2).reverse(), featured];
 
   return (
     <section className="px-2 pt-3 sm:px-3" aria-labelledby="hero-title">
@@ -50,7 +54,11 @@ export function Hero() {
                 className="flex flex-wrap items-center gap-2.5"
               >
                 <Badge tone="accent">{site.templateCount} templates available</Badge>
-                {liveCount > 0 && <Badge tone="dark">Live 3D demo</Badge>}
+                {liveCount === templates.length ? (
+                  <Badge tone="dark">Every one has a live demo</Badge>
+                ) : (
+                  liveCount > 0 && <Badge tone="dark">{liveCount} live demos</Badge>
+                )}
               </Reveal>
 
               <h1 id="hero-title" className="mt-6">
@@ -103,7 +111,7 @@ export function Hero() {
                     rel="noopener noreferrer"
                     className="link-rule inline-flex min-h-11 items-center text-[0.875rem] font-bold text-white"
                   >
-                    Try the {featured.name} 3D product demo — no signup
+                    Try the {featured.name} demo — no signup, no email
                   </a>
                 </Reveal>
               )}

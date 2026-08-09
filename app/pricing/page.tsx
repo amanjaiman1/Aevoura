@@ -34,7 +34,7 @@ const comparison = [
     label: "Aevoura template",
     price: "₹9,999 — ₹75,000",
     points: [
-      "One of five, not one of ten thousand",
+      "One of a handful, not one of ten thousand",
       "Real engineering, no page builder",
       "The people who built it answer you",
       "Upgrade path to a custom build",

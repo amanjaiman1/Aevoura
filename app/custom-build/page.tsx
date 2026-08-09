@@ -13,7 +13,7 @@ import { Eyebrow, CheckMark } from "@/components/primitives/Marks";
 export const metadata: Metadata = {
   title: "Custom website build",
   description:
-    "Start from one of five engineered templates and have everything above it rebuilt around your brand. Custom builds from ₹75,000, usually live in 3 to 6 weeks.",
+    "Start from a finished, engineered template and have everything above it rebuilt around your brand. Custom builds from ₹75,000, usually live in 3 to 6 weeks.",
   alternates: { canonical: "/custom-build" },
 };
 

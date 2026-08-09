@@ -482,8 +482,9 @@ input[type="number"]::-webkit-inner-spin-button {
   position: absolute;
   top: 0;
   bottom: 0;
-  /* 1px overlap: no sub-pixel seams as the panels travel. */
-  width: calc(20% + 1px);
+  /* Derived from the collection size; 1px overlap avoids sub-pixel seams
+     as the panels travel. */
+  width: calc(100% / var(--panels, 5) + 1px);
   background-color: var(--color-dark);
   transform: translate3d(0, 0, 0);
   will-change: transform;
@@ -721,25 +722,33 @@ input[type="number"]::-webkit-inner-spin-button {
   white-space: nowrap;
 }
 
-/* A window one row tall over a column of five numbers. Stepping the strip
-   counts 01 -> 05 with no JavaScript. Four steps between five rows. */
+/* The counter. Each number owns a slice of the hold and is invisible outside
+   it, so the count derives from however many templates exist. `steps()` cannot
+   be driven by a custom property, which is why this is not a stepped strip. */
 .boot-count {
+  position: relative;
   display: block;
   height: 1.2em;
-  overflow: hidden;
+  min-width: 2.2ch;
 }
-.boot-count-strip {
-  display: block;
-  animation: boot-count 800ms steps(4, jump-end) 240ms forwards;
-}
-.boot-count-strip > span {
-  display: block;
-  height: 1.2em;
+.boot-count > span {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
   line-height: 1.2em;
+  animation-name: boot-tick;
+  animation-timing-function: linear;
 }
-@keyframes boot-count {
+/* The final number stays up until the panels lift. */
+.boot-count > span:last-child {
+  animation-fill-mode: forwards;
+}
+@keyframes boot-tick {
+  from {
+    opacity: 1;
+  }
   to {
-    transform: translate3d(0, -80%, 0);
+    opacity: 1;
   }
 }
 

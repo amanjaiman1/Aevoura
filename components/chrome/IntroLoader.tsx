@@ -2,16 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { site } from "@/lib/site";
+import { templateCount } from "@/lib/templates";
 
 const SESSION_KEY = "aevoura:entered";
-const PANELS = 5;
+
+/**
+ * One panel per template, so the reveal always states the size of the
+ * collection. Clamped: below three the split stops reading as a split, above
+ * six the panels get too thin to notice.
+ */
+const PANELS = Math.min(6, Math.max(3, templateCount));
 
 /**
  * THE ENTRANCE
  *
- * A dark stage holds the mark while a counter steps 01 → 05, then the screen
- * splits into five panels that lift away with a crimson leading edge to
- * reveal the site. Five panels, five templates — the motif is the product.
+ * A dark stage holds the mark while a counter steps through the collection,
+ * then the screen splits into one panel per template, each lifting away with a
+ * crimson leading edge to reveal the site. The motif is the product: however
+ * many templates exist, that is how many panels part.
  *
  * ── Why it is built this way ────────────────────────────────────────────
  *
@@ -109,9 +117,10 @@ export function IntroLoader() {
           // Fallback timing for visitors with no JavaScript. Deliberately a
           // little later than the JS timer so JS normally triggers first.
           ["--boot-hold" as string]: `${site.intro.holdMs + 260}ms`,
+          ["--panels" as string]: PANELS,
         }}
       >
-        {/* the five shutters */}
+        {/* the shutters — one per template */}
         <div className="boot-panels">
           {Array.from({ length: PANELS }, (_, i) => (
             <span
@@ -122,8 +131,8 @@ export function IntroLoader() {
           ))}
         </div>
 
-        {/* Four hairlines on the seams, so the five-way split reads as
-            designed rather than arbitrary when the panels part. */}
+        {/* Hairlines on the seams, so the split reads as designed rather
+            than arbitrary when the panels part. */}
         <div className="boot-seams" aria-hidden="true">
           {Array.from({ length: PANELS - 1 }, (_, i) => (
             <span
@@ -172,12 +181,22 @@ export function IntroLoader() {
 
           {/* status band */}
           <div className="boot-band">
+            {/* Counts the real collection. Each number owns a slice of the
+                hold, so this derives from the data rather than a fixed
+                keyframe — a stepped strip cannot, because steps() will not
+                take a custom property. */}
             <span className="boot-count" aria-hidden="true">
-              <span className="boot-count-strip">
-                {Array.from({ length: PANELS }, (_, i) => (
-                  <span key={i}>0{i + 1}</span>
-                ))}
-              </span>
+              {Array.from({ length: templateCount }, (_, i) => (
+                <span
+                  key={i}
+                  style={{
+                    animationDelay: `${240 + (i * site.intro.holdMs * 0.62) / templateCount}ms`,
+                    animationDuration: `${(site.intro.holdMs * 0.62) / templateCount}ms`,
+                  }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              ))}
             </span>
 
             <span className="boot-rail">
@@ -185,7 +204,7 @@ export function IntroLoader() {
             </span>
 
             <span className="boot-label">
-              0{site.templateCount}&nbsp;Templates
+              {String(site.templateCount).padStart(2, "0")}&nbsp;Templates
             </span>
           </div>
         </div>

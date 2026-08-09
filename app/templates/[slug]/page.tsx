@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 import { site } from "@/lib/site";
 import {
@@ -142,6 +143,13 @@ export default async function TemplatePage({ params }: { params: Promise<Params>
 
             <p className="mt-5 max-w-xl text-lead text-ink-soft">{template.tagline}</p>
 
+            <p className="mt-4 text-[0.875rem] text-ink-muted">
+              The demo ships configured as{" "}
+              <span className="font-medium text-ink-soft">{template.demoBrand}</span>.
+              All of that content lives in config and data files — no component
+              holds it.
+            </p>
+
             <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-2">
               {template.bestFor.map((item) => (
                 <li key={item} className="flex gap-2">
@@ -253,6 +261,45 @@ export default async function TemplatePage({ params }: { params: Promise<Params>
           </p>
         )}
       </section>
+
+      {/* ══ MORE OF THE BUILD ══ */}
+      {template.gallery && template.gallery.length > 0 && (
+        <section className="shell mt-6 sm:mt-8" aria-label={`More screens from ${template.name}`}>
+          <Reveal variant="up" mode="reveal" group className="grid gap-4 sm:grid-cols-2">
+            {template.gallery.map((shot) => (
+              <figure
+                key={shot.src}
+                className="panel overflow-hidden border border-rule"
+                style={{ backgroundColor: template.theme.ground }}
+              >
+                <div className="relative" style={{ aspectRatio: "16 / 10" }}>
+                  <Image
+                    src={shot.src}
+                    alt={shot.alt}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 46vw"
+                    loading="lazy"
+                    className="object-cover"
+                  />
+                </div>
+              </figure>
+            ))}
+          </Reveal>
+          <p className="mt-3 text-[0.8125rem] text-ink-muted">
+            Real screens from the live build, not mock-ups.{" "}
+            {template.liveDemo && (
+              <a
+                href={template.liveDemo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-rule font-bold text-ink"
+              >
+                Open the demo and check
+              </a>
+            )}
+          </p>
+        </section>
+      )}
 
       {/* ══ WHY IT SELLS ══ */}
       <section className="shell section-y" aria-labelledby="highlights-title">

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Structured data. Honest by construction: it describes five real products
+ * Structured data. Honest by construction: it describes the real products
  * with real starting prices and claims nothing about ratings or review
  * counts we do not have.
  */

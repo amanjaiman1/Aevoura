@@ -16,7 +16,8 @@ import { ActionLink } from "@/components/primitives/ActionLink";
  */
 export function TemplateShowcase() {
   const featured = getFeaturedTemplate();
-  const rest = templates.filter((t) => t.slug !== featured.slug);
+  /** Featured first, then the rest in collection order. */
+  const ordered = [featured, ...templates.filter((t) => t.slug !== featured.slug)];
 
   return (
     <section id="templates" className="shell scroll-mt-28 section-y" aria-labelledby="templates-title">
@@ -33,9 +34,9 @@ export function TemplateShowcase() {
         </div>
         <div className="lg:col-span-5 lg:text-right">
           <p className="text-[1rem] leading-relaxed text-ink-muted">
-            Not a marketplace with a thousand near-identical themes. Five
-            complete builds, each taken to the point where it could launch
-            tomorrow.
+            Not a marketplace with a thousand near-identical themes. Complete
+            builds with public demos, each taken to the point where it could
+            launch tomorrow.
           </p>
           <div className="mt-5 lg:flex lg:justify-end">
             <ActionLink href="/templates" variant="outline">
@@ -45,18 +46,18 @@ export function TemplateShowcase() {
         </div>
       </div>
 
-      <Reveal variant="up" mode="reveal" className="mt-10">
-        <TemplateCard template={featured} layout="wide" priority />
-      </Reveal>
-
-      <Reveal
-        variant="up"
-        mode="reveal"
-        group
-        className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4"
-      >
-        {rest.map((template) => (
-          <TemplateCard key={template.slug} template={template} />
+      {/* Every template gets a full row. With a short collection that reads far
+          better than a sparse grid, and it shows each real screenshot at a size
+          where the work is actually legible. */}
+      <Reveal variant="up" mode="reveal" className="mt-10 grid gap-5">
+        {ordered.map((template, i) => (
+          <TemplateCard
+            key={template.slug}
+            template={template}
+            layout="wide"
+            priority={i === 0}
+            mirrored={i % 2 === 1}
+          />
         ))}
       </Reveal>
 

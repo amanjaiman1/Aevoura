@@ -1,6 +1,16 @@
 # Aevoura
 
-A commercial storefront for five premium website templates. Buy the source code, have us launch it, or commission a custom build. Orders are placed by email — there is no payment gateway yet, and the site says so plainly rather than faking a checkout.
+A commercial storefront for premium website templates. Buy the source code, have us launch it, or commission a custom build. Orders are placed by email — there is no payment gateway yet, and the site says so plainly rather than faking a checkout.
+
+The collection currently holds **three** templates, each a real build with a public live demo:
+
+| Template | For | Demo |
+| --- | --- | --- |
+| **Aabha** | Fine jewellery, sold by telephone | [temp-jwel.vercel.app](https://temp-jwel.vercel.app/) |
+| **Section** | Architecture & interiors | [temp-interior.vercel.app](https://temp-interior.vercel.app/) |
+| **Point of View** | Personal brand & workshops | [temp-marketing-eight.vercel.app](https://temp-marketing-eight.vercel.app/) |
+
+All three are React + Vite + TypeScript + Tailwind v4 + GSAP + Lenis builds. Aevoura itself is Next.js; the templates it sells are not, and the site states each template's real stack.
 
 ```bash
 npm install
@@ -57,15 +67,29 @@ Spam is not a concern here because nothing is submitted to a server — the visi
 
 `lib/templates.ts` is the single source of truth. Every route, listing, order-form option, sitemap entry and JSON-LD product derives from it.
 
-**Adding a sixth template** means appending one entry. Nothing else needs touching.
+**Adding a template** means appending one entry to `collection` in `lib/templates.ts`. Numbers, counts, the word form of the count, the footer links, the order-form options, the sitemap, the JSON-LD and the entrance animation all derive from that array.
+
+**Nothing unbuilt gets listed.** Directions we intend to build live in `conceptTemplates` at the bottom of the file and are deliberately rendered nowhere. Every template on the site must be one a visitor can try before paying and we can ship the same week — listing something unbuyable beside something buyable is how a storefront loses trust.
 
 **Selling one exclusively:** set `availability: "sold"`. It drops out of the sitemap, is listed in the licence page's withdrawal register, and the footer count updates. The page is kept rather than deleted, so the record stays honest.
 
 ### Media conventions
 
-**Posters** (required) live at `public/works/<slug>.svg`. They are hand-authored placeholders — an art-directed visual world per template, not stock photography. A few kilobytes each, no image optimiser needed, and they cannot shift layout.
+**Posters** are real 1600×1000 frames captured from the live demos and committed as WebP in `public/works/`. They render through `next/image`, so AVIF and WebP variants and a responsive srcset are generated automatically. Roughly 25–145 KB each; only the first is eager.
 
-To replace one with a real frame: export at 1600×1000 as `.avif` or `.webp`, update `poster` and `posterAspect`, and switch the `<img>` in `components/templates/PreviewMedia.tsx` to `next/image` (`next.config.ts` is already configured).
+**Gallery** frames are optional extra screenshots shown on the template detail page, so a buyer sees more than the hero before paying.
+
+To regenerate after a demo changes:
+
+```bash
+npm i -D playwright sharp     # tooling only, not shipped
+npx playwright install chromium
+node tools/capture.mjs        # -> .raw-shots/*.png  (gitignored)
+node tools/optimise.mjs       # -> public/works/*.webp
+npm uninstall playwright sharp
+```
+
+`tools/capture.mjs` waits out each demo's loader and page intro before shooting, and also prints each site's real headings, nav and computed colours — which is how the copy and the `theme` values in `templates.ts` were written rather than guessed.
 
 **Preview video** (optional) goes at `public/works/<slug>/preview.mp4`, referenced from `previewVideo`. Target an 8–12 second silent loop, 1280px wide, under 1.5 MB. `null` is fully supported and is the current state.
 
@@ -118,9 +142,11 @@ There is no state in which content stays invisible. Hero media is deliberately *
 
 ## The entrance
 
-A dark stage holds the mark while a counter steps 01 → 05, then the screen
-splits into five panels that lift away with a crimson leading edge to reveal
-the site. Five panels, five templates.
+A dark stage holds the mark while a counter steps through the collection, then
+the screen splits into one panel per template, each lifting away with a crimson
+leading edge to reveal the site. The motif is the product: however many
+templates exist, that is how many panels part (clamped to 3–6, because below
+three it stops reading as a split and above six the panels get too thin).
 
 Tuned in `site.intro`:
 
@@ -204,6 +230,6 @@ Four things in it are load-bearing:
 2. Add real URLs to `site.social` — entries with an empty `href` render as inactive text
 3. Optionally set `site.contact.phone` to show a call button in the header
 4. Add an Open Graph image at `app/opengraph-image.png` (1200×630)
-5. Populate `liveDemo` for templates 02–05 as their demos are hosted
+5. Nothing else — all three templates already have public live demos wired
 
-**Note on the Aurvi demo:** the URL is wired and opens in a new tab. It sends `X-Frame-Options: SAMEORIGIN`, so it can never be embedded in an iframe — a new tab is the only viable route.
+**Note on the demos:** all three are live Vercel deployments and open in a new tab. None sets `X-Frame-Options`, so they *could* be embedded — but a new tab is still the right call: each template runs its own Lenis smooth-scroll and pinned scroll scenes, which fight an iframe.

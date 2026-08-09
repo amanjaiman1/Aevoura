@@ -43,3 +43,6 @@ next-env.d.ts
 
 # local verification artefacts
 /.audit/
+
+# raw screenshot frames from tools/capture.mjs (only the optimised webp is committed)
+/.raw-shots/
