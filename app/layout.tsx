@@ -80,11 +80,43 @@ export const viewport: Viewport = {
 };
 
 /**
- * Adds `js-motion` before first paint, and only when motion is welcome.
- * Elements marked for reveal are hidden by CSS behind this class, so no-JS
- * and reduced-motion visitors always see complete content.
+ * Diameter of the opening's dot, in pixels. Lives here because both the CSS
+ * custom property and the cover-scale maths below are derived from it.
  */
-const MOTION_BOOTSTRAP = `(function(){try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('js-motion')}}catch(e){}})();`;
+const INTRO_DOT_PX = 14;
+
+/**
+ * Runs before the body is parsed, which is what makes the opening possible
+ * without the site flashing underneath first.
+ *
+ * It opts in to motion by setting `js-motion` (reveal animations) and
+ * `data-intro` (the opening overlay), and only when the visitor has not asked
+ * for reduced motion. Neither attribute is ever set without JavaScript, so a
+ * no-JS visitor gets the site immediately and can never be trapped behind an
+ * overlay.
+ *
+ * It also publishes the two values the CSS cannot work out for itself:
+ *   --intro-total   the sequence length, from site.intro.totalMs
+ *   --intro-cover   the scale that takes the dot past the furthest corner,
+ *                   from the viewport diagonal. CSS has no sqrt() it can rely
+ *                   on, and a hardcoded scale would be wrong on most screens.
+ *
+ * Finally it arms a fallback timer that removes `data-intro` regardless of
+ * React, so the scroll lock releases even if hydration never happens.
+ */
+const BOOTSTRAP = `(function(){try{
+var d=document.documentElement;
+if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+d.classList.add('js-motion');
+${site.intro.enabled ? `
+d.setAttribute('data-intro','');
+d.style.setProperty('--intro-total','${site.intro.totalMs}ms');
+d.style.setProperty('--intro-dot','${INTRO_DOT_PX}px');
+var r=Math.sqrt(innerWidth*innerWidth+innerHeight*innerHeight)/2;
+d.style.setProperty('--intro-cover',String(Math.ceil(r/${INTRO_DOT_PX / 2})+2));
+setTimeout(function(){d.removeAttribute('data-intro')},${Math.round(site.intro.totalMs * 1.45)});
+` : ""}
+}catch(e){}})();`;
 
 export default function RootLayout({
   children,
@@ -92,13 +124,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: MOTION_BOOTSTRAP }} />
+        <script dangerouslySetInnerHTML={{ __html: BOOTSTRAP }} />
       </head>
       <body>
         <IntroLoader />
         <ScrollManager />
         <MotionRuntime />
-        <div className="flex min-h-screen flex-col">
+        {/* `site-shell` is what the opening reveals. */}
+        <div className="site-shell flex min-h-screen flex-col">
           <SiteHeader />
           {/* tabIndex allows the skip link to move focus here, not just
               scroll. Programmatic focus on a container needs no ring. */}

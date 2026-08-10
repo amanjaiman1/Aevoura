@@ -14,12 +14,34 @@ const FOCUSABLE =
 /**
  * Navigation drawer.
  *
- * Accessible dialog behaviour: labelled, modal, focus moved in on open and
- * restored on close, Tab cycled inside, Escape to dismiss, background scroll
- * locked. It also carries the template list and prices, because on a phone
- * this is the fastest route to the thing someone came to buy.
+ * ── Why it stays mounted ────────────────────────────────────────────────
+ *
+ * The panel is always in the DOM and hidden with `visibility`, not with the
+ * `hidden` attribute or `display: none`. That is what lets it animate *out* as
+ * well as in — a display swap has no closing transition to run. `visibility`
+ * also removes it from the tab order and the accessibility tree while closed,
+ * which `opacity: 0` alone would not.
+ *
+ * ── Why the close button is in the header ───────────────────────────────
+ *
+ * The header sits above this panel, so the hamburger stays visible and
+ * transforms into the close control rather than being covered by a second
+ * button. The trade-off is that the panel's close affordance lives outside the
+ * dialog, so the toggle is passed in and spliced into the focus cycle — first,
+ * so Shift+Tab from the top of the menu lands on it.
+ *
+ * Accessible dialog behaviour otherwise: labelled, modal, focus moved in on
+ * open and restored on close, Tab cycled, Escape to dismiss, scroll locked.
  */
-export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function MobileMenu({
+  open,
+  onClose,
+  toggleRef,
+}: {
+  open: boolean;
+  onClose: () => void;
+  toggleRef?: React.RefObject<HTMLButtonElement | null>;
+}) {
   const panel = useRef<HTMLDivElement>(null);
   const restoreTo = useRef<HTMLElement | null>(null);
 
@@ -30,7 +52,11 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
     const scrollLock = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    panel.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+    // Let the panel become visible before focus moves, so the browser does not
+    // scroll a still-hidden element into view.
+    const focusFirst = window.requestAnimationFrame(() => {
+      panel.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+    });
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -40,9 +66,13 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
       }
       if (event.key !== "Tab" || !panel.current) return;
 
-      const items = Array.from(
+      const inPanel = Array.from(
         panel.current.querySelectorAll<HTMLElement>(FOCUSABLE)
       ).filter((el) => el.offsetParent !== null);
+      // The toggle is the close control, so it belongs in the cycle.
+      const items = [toggleRef?.current, ...inPanel].filter(
+        (el): el is HTMLElement => Boolean(el)
+      );
       if (!items.length) return;
 
       const first = items[0];
@@ -58,37 +88,33 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
 
     document.addEventListener("keydown", onKeyDown);
     return () => {
+      window.cancelAnimationFrame(focusFirst);
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = scrollLock;
       restoreTo.current?.focus();
     };
-  }, [open, onClose]);
+  }, [open, onClose, toggleRef]);
+
+  /** Stagger index, continuing across the two lists. */
+  let order = 0;
+  const next = () => ({ ["--i" as string]: order++ });
 
   return (
     <div
+      id="mobile-menu"
       ref={panel}
       role="dialog"
       aria-modal="true"
       aria-label="Menu"
-      hidden={!open}
-      className="fixed inset-0 z-70 flex flex-col bg-page lg:hidden"
+      data-open={open ? "true" : "false"}
+      className="menu-panel fixed inset-0 z-60 flex flex-col bg-page lg:hidden"
     >
-      <div className="flex items-center justify-between px-gutter py-4">
-        <p className="eyebrow text-ink-muted">Menu</p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex min-h-11 items-center rounded-full bg-ink px-5 text-[0.8125rem] font-bold text-white"
-        >
-          Close
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto overscroll-contain px-gutter pb-8">
+      {/* Clears the header pill, which floats above this panel. */}
+      <div className="flex-1 overflow-y-auto overscroll-contain px-gutter pt-24 pb-8">
         <nav aria-label="Primary">
           <ul className="card overflow-hidden p-2">
             {primaryNav.map((item) => (
-              <li key={item.href}>
+              <li key={item.href} className="menu-item" style={next()}>
                 <Link
                   href={item.href}
                   onClick={onClose}
@@ -104,12 +130,12 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
           </ul>
         </nav>
 
-        <p className="eyebrow mt-8 mb-3 text-ink-muted">
+        <p className="menu-item eyebrow mt-8 mb-3 text-ink-muted" style={next()}>
           {site.templateCount} templates
         </p>
         <ul className="card divide-y divide-rule-soft overflow-hidden">
           {templates.map((template) => (
-            <li key={template.slug}>
+            <li key={template.slug} className="menu-item" style={next()}>
               <Link
                 href={`/templates/${template.slug}`}
                 onClick={onClose}
@@ -135,15 +161,20 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
         </ul>
 
         <div className="mt-8 flex flex-col gap-3">
-          <ActionLink href="/buy" variant="primary" size="lg" full>
-            Buy a template
-          </ActionLink>
-          <ActionLink href="/custom-build" variant="outline" size="lg" full>
-            Commission a custom build
-          </ActionLink>
+          <div className="menu-item" style={next()}>
+            <ActionLink href="/buy" variant="primary" size="lg" full>
+              Buy a template
+            </ActionLink>
+          </div>
+          <div className="menu-item" style={next()}>
+            <ActionLink href="/custom-build" variant="outline" size="lg" full>
+              Commission a custom build
+            </ActionLink>
+          </div>
           <a
             href={`mailto:${site.contact.email}`}
-            className="mt-2 flex min-h-11 items-center justify-center text-[0.875rem] font-medium text-ink-muted"
+            className="menu-item mt-2 flex min-h-11 items-center justify-center text-[0.875rem] font-medium text-ink-muted"
+            style={next()}
           >
             {site.contact.email}
           </a>

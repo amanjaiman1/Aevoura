@@ -425,363 +425,285 @@ input[type="number"]::-webkit-inner-spin-button {
 
 
 /* ============================================================
-   THE ENTRANCE
+   THE OPENING
 
-   A dark stage, then five panels lift away with a crimson leading
-   edge. Five panels, five templates.
+   White canvas → a black dot falls to the centre → it expands to
+   take the screen → the site is revealed underneath.
 
-   Entirely CSS: the overlay is server-rendered, so if the exit
-   depended on JavaScript a visitor with JS disabled would be stuck
-   behind it forever. Transforms and opacity only — no layout is
-   animated, so this stays on the compositor.
+   EMPTY → CURIOUS → IMPACT → REVEAL
 
-   Timeline (ms)
-     100  mark disc scales in
-     260  mark stroke draws itself
-     300  wordmark letters rise, 42ms apart
-     240  rail fills and the counter steps 01 -> 05
-     640  tagline fades up
-    1120  stage fades, panels begin lifting 60ms apart
-    2060  last panel clears
+   Runs on every full page load by design. There is no session
+   storage and no "once per visit" behaviour anywhere in it.
+
+   ── How it is wired, and why ─────────────────────────────────
+
+   `html[data-intro]` is set by an inline script in <head>, before
+   the body is parsed, and only when motion is welcome. So:
+
+     no JavaScript      → the attribute is never set, the overlay
+                          stays display:none, the site is usable
+                          immediately and nobody can be trapped
+     reduced motion     → same, plus a short fade instead
+     otherwise          → the overlay is painted from the first
+                          frame, so the site never flashes first
+
+   The whole sequence runs on CSS animations. JavaScript only
+   releases the scroll lock and unmounts the node, and the same
+   head script sets a fallback timer to strip `data-intro` even if
+   React never hydrates — so the scroll lock can never stick.
+
+   Only transform and opacity are animated. The sequence stays on
+   the compositor throughout.
+
+   Phase timings all derive from `--intro-total`, which the head
+   script writes from `site.intro.totalMs`. One source of truth.
    ============================================================ */
 
-#aevoura-boot {
+#aevoura-intro {
+  /* Hidden unless the head script has opted in. This is the no-JS and
+     reduced-motion safety net, and it is deliberately the default. */
+  display: none;
+}
+
+html[data-intro] #aevoura-intro {
+  display: block;
   position: fixed;
   inset: 0;
+  /* dvh as well as inset, so mobile browser chrome cannot leave an
+     uncovered strip at the bottom. */
+  min-height: 100dvh;
   z-index: 95;
   overflow: hidden;
-  /* Deliberately transparent: the five panels are the cover. If the container
-     carried the dark colour too, lifting the panels would reveal *it* rather
-     than the page, and the reveal would look like nothing happened. */
-  /* Never intercepts a click, even mid-animation. */
-  pointer-events: none;
-  /* Belt and braces for the no-JavaScript path: once the sequence has run the
-     container moves itself off-screen entirely. With JS the node is unmounted
-     before this matters. */
-  animation: boot-retire 1ms linear forwards;
-  animation-delay: calc(var(--boot-hold, 1400ms) + 1100ms);
+  background-color: #ffffff;
+  /* Nothing underneath can be touched, dragged or clicked. */
+  touch-action: none;
+  overscroll-behavior: none;
+  animation:
+    intro-out calc(var(--intro-total, 1900ms) * 0.22) var(--ease-reveal)
+      calc(var(--intro-total, 1900ms) * 0.87) forwards,
+    /* Ends by taking itself off-screen. A transform fills reliably;
+       `visibility` does not hold under animation-fill-mode. */
+      intro-retire 1ms linear calc(var(--intro-total, 1900ms) * 1.14) forwards;
 }
 
-/* Translated off-screen rather than `visibility: hidden`: visibility is a
-   discrete property and does not reliably hold under animation-fill-mode,
-   whereas a transform always does. */
-@keyframes boot-retire {
+@keyframes intro-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes intro-retire {
   to {
     transform: translate3d(0, -100%, 0);
+    pointer-events: none;
   }
 }
 
-/* ---- the shutters ---- */
+/* ---- the dot ----
+   One animation for the whole journey rather than three. With several
+   animations on the same property the precedence rules between "filling"
+   and "not yet started" are easy to get wrong; a single keyframe set with
+   per-segment easing is both simpler and exact. */
 
-.boot-panels {
+html[data-intro] .intro-dot {
   position: absolute;
-  inset: 0;
-}
-
-.boot-panel {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  /* Derived from the collection size; 1px overlap avoids sub-pixel seams
-     as the panels travel. */
-  width: calc(100% / var(--panels, 5) + 1px);
-  background-color: var(--color-dark);
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
-/* The lit edge that sweeps up with each panel. */
-.boot-panel::after {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: 2px;
-  background-color: var(--color-accent);
+  top: 50%;
+  left: 50%;
+  width: var(--intro-dot, 14px);
+  height: var(--intro-dot, 14px);
+  margin: calc(var(--intro-dot, 14px) / -2);
+  border-radius: 50%;
+  background-color: #0a0a0a;
   opacity: 0;
+  transform: translate3d(0, var(--intro-rise, -14vh), 0) scale(0.35);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  animation: intro-dot calc(var(--intro-total, 1900ms) * 0.81) linear
+    calc(var(--intro-total, 1900ms) * 0.06) forwards;
 }
 
-/* The lift runs on a CSS delay by default, so a visitor with JavaScript
-   disabled is never left behind a permanent dark screen. `--boot-hold` is set
-   slightly later than the JS timer, so with JS present the attribute below
-   fires first and this is only ever a fallback. */
-.boot-panel {
-  animation: boot-lift 700ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
-  animation-delay: calc(var(--boot-hold, 1400ms) + var(--i) * 60ms);
-}
-.boot-panel::after {
-  animation: boot-edge 700ms linear forwards;
-  animation-delay: calc(var(--boot-hold, 1400ms) + var(--i) * 60ms);
-}
-
-/* JavaScript path: start now instead of waiting out the fallback delay. */
-#aevoura-boot[data-leaving="true"] .boot-panel,
-#aevoura-boot[data-leaving="true"] .boot-panel::after {
-  animation-delay: calc(var(--i) * 60ms);
-}
-
-@keyframes boot-lift {
-  to {
-    transform: translate3d(0, -101%, 0);
-  }
-}
-@keyframes boot-edge {
+@keyframes intro-dot {
+  /* appear */
   0% {
     opacity: 0;
+    transform: translate3d(0, var(--intro-rise, -14vh), 0) scale(0.35);
+    animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
   }
-  12% {
+  16% {
     opacity: 1;
+    transform: translate3d(0, var(--intro-rise, -14vh), 0) scale(1);
+    animation-timing-function: linear;
   }
-  75% {
+  /* hold — the beat before it falls */
+  22% {
     opacity: 1;
+    transform: translate3d(0, var(--intro-rise, -14vh), 0) scale(1);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.2, 1);
   }
+  /* the fall: gathers speed, then settles. No bounce. */
+  50% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    animation-timing-function: linear;
+  }
+  /* impact — a held frame, so the expansion reads as a consequence */
+  57% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    animation-timing-function: cubic-bezier(0.72, 0, 0.24, 1);
+  }
+  /* takeover. `--intro-cover` is computed from the viewport diagonal by the
+     head script; the fallback is large enough for an 8K display. */
   100% {
-    opacity: 0;
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(var(--intro-cover, 820));
   }
 }
 
-/* ---- the seams ---- */
+/* ---- coverage guarantee ----
+   A flat black layer reaching full opacity exactly as the dot finishes
+   expanding. Even if the computed scale were short on some viewport, there
+   can never be a white corner at the moment of handover. */
 
-.boot-seams {
+html[data-intro] .intro-fill {
   position: absolute;
   inset: 0;
-  z-index: 1;
-}
-.boot-seams > span {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background-color: rgb(255 255 255 / 0.07);
-  transform: scaleY(0);
-  transform-origin: top center;
-  animation: boot-seam 720ms var(--ease-reveal) forwards;
-}
-@keyframes boot-seam {
-  to {
-    transform: scaleY(1);
-  }
-}
-
-/* The seams leave with the stage. */
-.boot-seams {
-  animation: boot-stage-out 260ms var(--ease-action) forwards;
-  animation-delay: var(--boot-hold, 1400ms);
-}
-#aevoura-boot[data-leaving="true"] .boot-seams {
-  animation-delay: 0ms;
-}
-
-/* ---- the stage ---- */
-
-.boot-stage {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: clamp(1.25rem, 4vw, 2.5rem);
-}
-
-.boot-stage {
-  animation: boot-stage-out 260ms var(--ease-action) forwards;
-  animation-delay: var(--boot-hold, 1400ms);
-}
-#aevoura-boot[data-leaving="true"] .boot-stage {
-  animation-delay: 0ms;
-}
-@keyframes boot-stage-out {
-  to {
-    opacity: 0;
-    transform: translate3d(0, -8px, 0);
-  }
-}
-
-.boot-center {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-}
-
-/* ---- the mark ---- */
-
-.boot-mark {
-  display: grid;
-  place-items: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  margin-bottom: 1.5rem;
-  border-radius: 50%;
-  background-color: var(--color-accent);
+  background-color: #0a0a0a;
   opacity: 0;
-  transform: scale(0.55);
-  animation: boot-mark-in 620ms var(--ease-reveal) 100ms forwards;
+  will-change: opacity;
+  animation: intro-fill calc(var(--intro-total, 1900ms) * 0.08) linear
+    calc(var(--intro-total, 1900ms) * 0.79) forwards;
 }
-.boot-mark svg {
-  width: 1.9rem;
-  height: 1.9rem;
-}
-@keyframes boot-mark-in {
+@keyframes intro-fill {
   to {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
-.boot-mark-a,
-.boot-mark-bar {
-  stroke-dasharray: 40;
-  stroke-dashoffset: 40;
-  animation: boot-draw 640ms var(--ease-reveal) 260ms forwards;
-}
-.boot-mark-bar {
-  stroke-dasharray: 10;
-  stroke-dashoffset: 10;
-  animation-delay: 460ms;
-  animation-duration: 420ms;
-}
-@keyframes boot-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
+/* ---- the reveal ----
+   `backwards` holds the from-state through the delay, so the site is already
+   hidden on the first frame. Critically it does *not* use `forwards`: the
+   animation must end at the element's natural state with no transform left
+   behind, because a lingering transform would become the containing block for
+   every `position: fixed` child — the sticky buy bar and the menu panel. */
 
-/* ---- the wordmark ---- */
-
-.boot-word {
-  display: flex;
-  font-family: var(--font-display);
-  font-size: clamp(2.25rem, 7vw, 4rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  color: #fff;
+html[data-intro] .site-shell {
+  animation: intro-reveal calc(var(--intro-total, 1900ms) * 0.26) var(--ease-reveal)
+    calc(var(--intro-total, 1900ms) * 0.88) backwards;
 }
-.boot-word > span {
-  display: inline-block;
-  opacity: 0;
-  transform: translate3d(0, 0.5em, 0);
-  animation: boot-letter 620ms var(--ease-reveal) forwards;
-}
-@keyframes boot-letter {
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-.boot-tagline {
-  margin-top: 1rem;
-  max-width: 24ch;
-  text-align: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-chalk-muted);
-  opacity: 0;
-  animation: boot-fade-up 620ms var(--ease-reveal) 640ms forwards;
-}
-@keyframes boot-fade-up {
+@keyframes intro-reveal {
   from {
     opacity: 0;
-    transform: translate3d(0, 0.5rem, 0);
+    transform: translate3d(0, 12px, 0) scale(0.994);
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
+    transform: none;
   }
 }
 
-/* ---- the status band ---- */
-
-.boot-band {
-  display: flex;
-  align-items: center;
-  gap: clamp(0.75rem, 3vw, 1.5rem);
-  opacity: 0;
-  animation: boot-fade-up 520ms var(--ease-reveal) 200ms forwards;
-}
-
-.boot-count,
-.boot-label {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
-  color: #fff;
-}
-.boot-label {
-  color: var(--color-chalk-muted);
-  white-space: nowrap;
-}
-
-/* The counter. Each number owns a slice of the hold and is invisible outside
-   it, so the count derives from however many templates exist. `steps()` cannot
-   be driven by a custom property, which is why this is not a stepped strip. */
-.boot-count {
-  position: relative;
-  display: block;
-  height: 1.2em;
-  min-width: 2.2ch;
-}
-.boot-count > span {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  line-height: 1.2em;
-  animation-name: boot-tick;
-  animation-timing-function: linear;
-}
-/* The final number stays up until the panels lift. */
-.boot-count > span:last-child {
-  animation-fill-mode: forwards;
-}
-@keyframes boot-tick {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.boot-rail {
-  position: relative;
-  display: block;
-  flex: 1;
-  height: 1px;
-  background-color: var(--color-dark-rule);
-}
-.boot-rail-fill {
-  position: absolute;
-  inset: 0;
-  display: block;
-  background-color: var(--color-accent);
-  transform: scaleX(0);
-  transform-origin: left center;
-  animation: boot-rail 860ms var(--ease-archive) 240ms forwards;
-}
-@keyframes boot-rail {
-  to {
-    transform: scaleX(1);
-  }
-}
-
-/* Nothing scrolls behind the overlay while it is up. */
-html[data-booting] body {
+/* Nothing scrolls or gets tabbed to while the opening is up. The head script
+   sets a fallback timer to remove the attribute, so this cannot stick. */
+html[data-intro] body {
   overflow: hidden;
 }
 
-/* Motion is unwelcome: skip the whole thing. */
+/* Motion is unwelcome: no dot, no takeover. The site simply fades up, which
+   still reads as intentional without any of the choreography. */
 @media (prefers-reduced-motion: reduce) {
-  #aevoura-boot {
+  html[data-intro] #aevoura-intro,
+  #aevoura-intro {
     display: none !important;
+  }
+  html[data-intro] .site-shell {
+    animation: none !important;
+  }
+  html[data-intro] body {
+    overflow: visible;
+  }
+}
+
+/* ============================================================
+   MOBILE MENU
+
+   The panel stays in the DOM and is hidden with `visibility`, so it can
+   animate out as well as in. `visibility` also takes it out of the tab
+   order and the accessibility tree when closed, which `opacity: 0` alone
+   would not.
+   ============================================================ */
+
+.menu-panel {
+  visibility: hidden;
+  opacity: 0;
+  transform: translate3d(0, -10px, 0);
+  transition:
+    opacity 300ms var(--ease-action),
+    transform 300ms var(--ease-action),
+    /* Delayed so the panel is still visible while it fades out. */ visibility 0s
+      linear 300ms;
+}
+
+.menu-panel[data-open="true"] {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 380ms var(--ease-reveal),
+    transform 420ms var(--ease-reveal),
+    visibility 0s linear 0s;
+}
+
+/* Links arrive just behind the panel, in order. Kept small on purpose:
+   precision rather than a flourish. */
+.menu-item {
+  opacity: 0;
+  transform: translate3d(0, 8px, 0);
+  transition:
+    opacity 260ms var(--ease-action),
+    transform 260ms var(--ease-action);
+}
+.menu-panel[data-open="true"] .menu-item {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 420ms var(--ease-reveal) calc(90ms + var(--i, 0) * 45ms),
+    transform 420ms var(--ease-reveal) calc(90ms + var(--i, 0) * 45ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-panel,
+  .menu-panel[data-open="true"],
+  .menu-item,
+  .menu-panel[data-open="true"] .menu-item {
+    transition-duration: 1ms !important;
+    transition-delay: 0s !important;
+    transform: none !important;
+  }
+}
+
+/* ---- the hamburger ----
+   Two lines meet in the middle and cross. The existing two-line mark is
+   kept exactly as it was in the closed state. */
+
+.burger-line {
+  display: block;
+  height: 1.5px;
+  width: 1rem;
+  border-radius: 999px;
+  background-color: currentColor;
+  transition: transform 400ms cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform;
+}
+/* The two 1.5px lines sit 5px apart, so their centres are 6.5px apart and
+   each travels half that to meet. */
+.menu-toggle[data-open="true"] .burger-line:first-child {
+  transform: translateY(3.25px) rotate(45deg);
+}
+.menu-toggle[data-open="true"] .burger-line:last-child {
+  transform: translateY(-3.25px) rotate(-45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burger-line {
+    transition-duration: 1ms !important;
   }
 }

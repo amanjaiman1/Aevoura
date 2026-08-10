@@ -52,16 +52,20 @@ export const site = {
   ],
 
   /**
-   * The entrance animation. Editable because a loader is a real trade-off:
-   * it buys atmosphere and costs time-to-content. Keep it short.
-   *   enabled          master switch
-   *   oncePerSession   returning visitors skip it entirely
-   *   holdMs           how long the mark holds before the panels lift
+   * The opening sequence. Plays on every full page load — deliberately no
+   * "once per session" behaviour.
+   *
+   *   enabled   master switch
+   *   totalMs   the whole sequence. Every phase is a fraction of this in
+   *             globals.css, and the head script publishes it as
+   *             `--intro-total`, so this is the only place timing lives.
+   *
+   *   Phases:  canvas 6% · dot settles 16% · falls to centre 50%
+   *            · held beat 57% · takeover 87% · reveal 88-114%
    */
   intro: {
     enabled: true,
-    oncePerSession: true,
-    holdMs: 1120,
+    totalMs: 1900,
   },
 
   /** Configurable placeholders. Empty `href` renders as inactive text. */

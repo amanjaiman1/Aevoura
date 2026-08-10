@@ -140,48 +140,74 @@ There is no state in which content stays invisible. Hero media is deliberately *
 
 ---
 
-## The entrance
+## The opening
 
-A dark stage holds the mark while a counter steps through the collection, then
-the screen splits into one panel per template, each lifting away with a crimson
-leading edge to reveal the site. The motif is the product: however many
-templates exist, that is how many panels part (clamped to 3–6, because below
-three it stops reading as a split and above six the panels get too thin).
+White canvas → a small black dot falls to the centre → it expands until the
+screen is black → the site is revealed underneath.
+
+**It plays on every full page load and refresh.** There is deliberately no
+session-storage or "once per visit" check anywhere in it. Client-side
+navigation does not replay it, because the component never unmounts and
+remounts on a route change.
 
 Tuned in `site.intro`:
 
 ```ts
-intro: { enabled: true, oncePerSession: true, holdMs: 1120 }
+intro: { enabled: true, totalMs: 1900 }
 ```
 
-- **`enabled`** turn it off entirely
-- **`oncePerSession`** returning visitors skip it
-- **`holdMs`** how long the mark holds before the panels part
+`totalMs` is the only timing value. Every phase is a fraction of it in
+`globals.css`, and the head script publishes it as `--intro-total`.
 
-### Why the exit runs on CSS, not JavaScript
+### The three things that make it work
 
-The overlay is server-rendered. If its removal depended on a React effect,
-a visitor with JavaScript disabled would sit behind a permanent dark screen
-with the whole site behind it — which is exactly the bug an earlier version of
-this had. So the panels lift on a CSS delay by default, and JavaScript only
-ever makes it leave *sooner* (on any key, click or scroll) before dropping the
-node from the tree.
+1. **No flash, ever.** The overlay is server-rendered *before* the site shell,
+   and an inline script in `<head>` sets `html[data-intro]` before the body is
+   parsed. The overlay's default state is `display: none`, so it is only ever
+   shown when that script has opted in.
+2. **No-JS and reduced-motion can't be trapped.** Because the attribute is the
+   opt-in, a visitor without JavaScript never sees the overlay at all and gets
+   the site immediately. The head script also arms a fallback timer that strips
+   the attribute regardless of React, so the scroll lock can never stick even if
+   hydration fails.
+3. **The circle genuinely covers the viewport.** CSS has no `sqrt()` it can rely
+   on, so the head script computes `--intro-cover` from the viewport diagonal.
+   Verified geometrically (centre-to-furthest-corner ≤ radius) at nine
+   viewports from 390×844 to 3840×2160. A flat black layer also reaches full
+   opacity at the exact handover frame, so there can never be a white corner
+   even if the maths were short.
 
-Three further details worth keeping if you edit it:
+### One subtle constraint
 
-- `#aevoura-boot` is **transparent**. The five panels are the cover. If the
-  container carried the dark colour too, lifting the panels would reveal *it*
-  rather than the page and the reveal would look like nothing happened.
-- The container retires with a **transform**, not `visibility: hidden` —
-  visibility is a discrete property and does not reliably hold under
-  `animation-fill-mode: forwards`.
-- The counter shows 01–05, the real template count. It is not a fake progress
-  percentage, because there is nothing genuine to measure.
-
-Skipped entirely under `prefers-reduced-motion`. Content renders underneath the
-whole time, so nothing waits on it.
+The reveal animation on `.site-shell` uses `animation-fill-mode: backwards`,
+never `forwards`. `backwards` holds the hidden start state through the delay
+but lets the element end at its natural state with **no transform left
+behind**. A lingering transform would make the shell the containing block for
+every `position: fixed` child — breaking the sticky mobile buy bar and the menu
+panel. The test suite asserts `shellTransform === "none"` after the sequence for
+exactly this reason.
 
 ---
+
+## Mobile menu
+
+The panel stays in the DOM and is hidden with `visibility`, not `display` or the
+`hidden` attribute — that is what lets it animate *out* as well as in. A display
+swap has no closing transition to run. `visibility` also removes it from the tab
+order and the accessibility tree while closed; verified by tabbing 26 stops and
+asserting focus never enters it.
+
+The header sits above the panel (`z-70` vs `z-60`), so the hamburger stays
+visible and its two lines rotate into an X rather than being covered by a second
+close button. The trade-off is that the close control lives outside the dialog,
+so the toggle is passed into the panel and spliced into the focus cycle first —
+Shift+Tab from the top of the menu lands on it.
+
+Links stagger in at 45ms intervals. Everything collapses to 1ms under reduced
+motion.
+
+---
+
 
 ## Scroll behaviour
 

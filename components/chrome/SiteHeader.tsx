@@ -32,6 +32,9 @@ export function SiteHeader() {
   const [openedOn, setOpenedOn] = useState<string | null>(null);
   const menuOpen = openedOn === pathname;
   const closeMenu = useCallback(() => setOpenedOn(null), []);
+  /** The panel sits below the header, so the toggle doubles as its close
+   *  button. It is handed to the menu to be included in the focus trap. */
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const read = () => {
@@ -61,7 +64,9 @@ export function SiteHeader() {
         Skip to content
       </a>
 
-      <header className="sticky top-0 z-40 pt-3 sm:pt-4">
+      {/* Above the mobile panel (z-60) so the hamburger stays visible and
+          can animate into the close control. */}
+      <header className="sticky top-0 z-70 pt-3 sm:pt-4">
         <div className="shell">
           <div className="flex items-center gap-2 sm:gap-3">
             {/* the pill */}
@@ -115,16 +120,20 @@ export function SiteHeader() {
               </IconButton>
 
               <button
+                ref={toggleRef}
                 type="button"
-                onClick={() => setOpenedOn(pathname)}
+                onClick={() => setOpenedOn(menuOpen ? null : pathname)}
                 aria-expanded={menuOpen}
-                aria-haspopup="dialog"
-                aria-label="Open menu"
-                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-rule bg-white text-ink transition-colors duration-200 hover:bg-sunk lg:hidden"
+                aria-controls="mobile-menu"
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                data-open={menuOpen ? "true" : "false"}
+                className="menu-toggle inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-rule bg-white text-ink transition-colors duration-200 hover:bg-sunk lg:hidden"
               >
+                {/* Two lines that meet and cross. The closed state is exactly
+                    the mark that was here before. */}
                 <span aria-hidden="true" className="flex flex-col gap-[5px]">
-                  <span className="block h-[1.5px] w-4 rounded-full bg-current" />
-                  <span className="block h-[1.5px] w-4 rounded-full bg-current" />
+                  <span className="burger-line" />
+                  <span className="burger-line" />
                 </span>
               </button>
             </div>
@@ -132,7 +141,7 @@ export function SiteHeader() {
         </div>
       </header>
 
-      <MobileMenu open={menuOpen} onClose={closeMenu} />
+      <MobileMenu open={menuOpen} onClose={closeMenu} toggleRef={toggleRef} />
     </>
   );
 }
