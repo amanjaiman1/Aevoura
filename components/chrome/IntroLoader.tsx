@@ -57,7 +57,7 @@ export function IntroLoader() {
       const dot =
         Number.parseFloat(
           getComputedStyle(root).getPropertyValue("--intro-dot")
-        ) || 14;
+        ) || 28;
       const radius = Math.hypot(window.innerWidth, window.innerHeight) / 2;
       root.style.setProperty(
         "--intro-cover",

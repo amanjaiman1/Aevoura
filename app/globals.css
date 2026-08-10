@@ -508,9 +508,9 @@ html[data-intro] .intro-dot {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: var(--intro-dot, 14px);
-  height: var(--intro-dot, 14px);
-  margin: calc(var(--intro-dot, 14px) / -2);
+  width: var(--intro-dot, 28px);
+  height: var(--intro-dot, 28px);
+  margin: calc(var(--intro-dot, 28px) / -2);
   border-radius: 50%;
   background-color: #0a0a0a;
   opacity: 0;
@@ -552,10 +552,11 @@ html[data-intro] .intro-dot {
     animation-timing-function: cubic-bezier(0.72, 0, 0.24, 1);
   }
   /* takeover. `--intro-cover` is computed from the viewport diagonal by the
-     head script; the fallback is large enough for an 8K display. */
+     head script; the fallback is large enough for an 8K display at the
+     current dot size. Both scale inversely with `--intro-dot`. */
   100% {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(var(--intro-cover, 820));
+    transform: translate3d(0, 0, 0) scale(var(--intro-cover, 410));
   }
 }
 

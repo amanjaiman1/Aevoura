@@ -82,8 +82,14 @@ export const viewport: Viewport = {
 /**
  * Diameter of the opening's dot, in pixels. Lives here because both the CSS
  * custom property and the cover-scale maths below are derived from it.
+ *
+ * Changing this is safe: `--intro-cover` is divided by the same number, so a
+ * larger dot needs proportionally less scale and the expansion still lands
+ * exactly past the furthest corner. The fallbacks in globals.css
+ * (`--intro-dot` and `--intro-cover`) are the only values that do not follow
+ * automatically — keep them in step.
  */
-const INTRO_DOT_PX = 14;
+const INTRO_DOT_PX = 28;
 
 /**
  * Runs before the body is parsed, which is what makes the opening possible
